@@ -31,14 +31,24 @@ class Parser:
     def get_tuples(self):
         return self.tup
 
+    def replace_non_vocab(self, vocab):
+        for sentence in self.tup:
+            for i, w in enumerate(sentence):
+                if not w[0] in vocab:
+                    sentence[i] = ('', '')
+
     def get_sentences(self):
         return self.word_vector
 
     def get_f2i(self):
-        return {f: i for i, f in enumerate(list(sorted(set([w[0] for w in self.word_vector]))))}
+        F2I = {f: i for i, f in enumerate(list(sorted(set([w[0] for w in self.word_vector]))))}
+        F2I[''] = len(F2I)
+        return F2I
 
     def get_l2i(self):
-        return {l: i for i, l in enumerate(list(sorted(set([w[1] for w in self.word_vector]))))}
+        L2I = {l: i for i, l in enumerate(list(sorted(set([w[1] for w in self.word_vector]))))}
+        L2I[''] = len(L2I)
+        return L2I
 
 
 if __name__ == '__main__':

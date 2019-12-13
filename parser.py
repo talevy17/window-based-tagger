@@ -4,13 +4,12 @@ class Parser:
     def __init__(self, file):
        self.file = open(file, 'r')
        self.tup = []
-       self.word_vector = []
+       self.word_vector = set()
 
     def parse_sentences(self):
-        sentence = []
         data = []
-        sentence.append('STARTT')
-        sentence.append('STARTT')
+        self.word_vector.add(('STARTT', 'STARTT'))
+        self.word_vector.add(('ENDD', 'ENDD'))
         data.append(('STARTT', 'STARTT'))
         data.append(('STARTT', 'STARTT'))
         for raw in self.file:
@@ -18,21 +17,15 @@ class Parser:
             raw_splitted = raw_splitted[0].split(' ')
             word = raw_splitted[0]
             if word == '':
-                sentence.append('ENDD')
-                sentence.append('ENDD')
                 data.append(('ENDD', 'ENDD'))
                 data.append(('ENDD', 'ENDD'))
-                self.word_vector.append(sentence)
                 self.tup.append(data)
-                sentence = []
                 data = []
-                sentence.append('STARTT')
-                sentence.append('STARTT')
                 data.append(('STARTT', 'STARTT'))
                 data.append(('STARTT', 'STARTT'))
                 continue
             label = raw_splitted[1]
-            sentence.append(word)
+            self.word_vector.add((word, label))
             data.append((word, label))
 
     def get_tuples(self):
@@ -42,12 +35,10 @@ class Parser:
         return self.word_vector
 
     def get_f2i(self):
-        words = [sentence for sentence in self.tup]
-        return {f: i for i, f in enumerate(list(sorted(set([w[0] for w in words]))))}
+        return {f: i for i, f in enumerate(list(sorted([w[0] for w in self.word_vector])))}
 
     def get_l2i(self):
-        labels = [sentence for sentence in self.tup]
-        return {l: i for i, l in enumerate(list(sorted(set([w[1] for w in labels]))))}
+        return {l: i for i, l in enumerate(list(sorted([w[1] for w in self.word_vector])))}
 
 
 if __name__ == '__main__':

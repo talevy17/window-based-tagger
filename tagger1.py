@@ -48,6 +48,40 @@ def time_for_epoch(start, end):
     return minutes, seconds
 
 
+def get_accuracy(prediction, y):
+    winners = prediction.argmax(dim=1)
+    return winners == y.argmax(dim=1)  # convert into float for division
+
+
+def train_sentence(sentence, model, optimizer, loss_func):
+    acc = 0
+    ep_loss = 0
+    for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
+        optimizer.zero_grad()
+        prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
+        loss = loss_func(prediction, w3[1])
+        acc += get_accuracy(prediction, w3[1])
+        ep_loss += loss
+        loss.backward()
+        optimizer.step()
+    return acc, len(sentence) - 4, ep_loss
+
+
+def train(model, train_set, optimizer, loss_func, epoch):
+    epoch_loss = 0
+    epoch_acc = 0
+    words = 0
+    model.train()
+    print(f'Epoch: {epoch + 1:02} | Starting Training...')
+    for index, batch in enumerate(train_set):
+        acc, num_words, loss = train_sentence(batch[0], model, optimizer, loss_func)
+        epoch_loss += loss
+        epoch_acc += acc
+        words += num_words
+    print(f'Epoch: {epoch + 1:02} | Finished Training')
+    return epoch_loss / words, epoch_acc / words
+
+
 def iterate_model(model, train_set, validation_set):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loss = nn.CrossEntropyLoss()

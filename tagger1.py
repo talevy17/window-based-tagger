@@ -5,7 +5,7 @@ from parser import Parser
 import numpy as np
 
 
-batch_size = 8
+batch_size = 1
 hidden_size = 100
 embedding_length = 50
 window_size = 5
@@ -46,7 +46,7 @@ class Model(nn.Module):
 def one_hot(label, size):
     y_hot = np.zeros(size)
     y_hot[label] = 1
-    return torch.from_numpy(y_hot.reshape(1, -1)).long()
+    return torch.from_numpy(y_hot.reshape(-1, 1)).long()
 
 
 def time_for_epoch(start, end):
@@ -58,7 +58,7 @@ def time_for_epoch(start, end):
 
 def get_accuracy(prediction, y):
     winners = prediction.argmax(dim=1)
-    return winners == y(dim=1)
+    return winners == y
 
 
 def train_sentence(sentence, model, optimizer, loss_func, L2I):
@@ -68,7 +68,8 @@ def train_sentence(sentence, model, optimizer, loss_func, L2I):
     for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
         optimizer.zero_grad()
         prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
-        loss = loss_func(prediction, one_hot(L2I[w3[1]], label_size))
+        label = one_hot(L2I[w3[1]], label_size)
+        loss = loss_func(prediction, label[0])
         acc += get_accuracy(prediction, L2I[w3[1]])
         ep_loss += loss
         loss.backward()

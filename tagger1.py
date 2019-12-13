@@ -82,7 +82,7 @@ def train(model, train_set, optimizer, loss_func, epoch):
     return epoch_loss / words, epoch_acc / words
 
 
-def evaluate_sentence(sentence, model, optimizer, loss_func):
+def evaluate_sentence(sentence, model, loss_func):
     acc = 0
     ep_loss = 0
     with torch.no_grad():
@@ -94,14 +94,14 @@ def evaluate_sentence(sentence, model, optimizer, loss_func):
         return acc, len(sentence) - 4, ep_loss
 
 
-def evaluate(model, train_set, optimizer, loss_func, epoch):
+def evaluate(model, validation_set, loss_func, epoch):
     epoch_loss = 0
     epoch_acc = 0
     words = 0
     model.eval()
     print(f'Epoch: {epoch + 1:02} | Starting Evaluating...')
-    for index, batch in enumerate(train_set):
-        acc, num_words, loss = evaluate_sentence(batch[0], model, optimizer, loss_func)
+    for index, batch in enumerate(validation_set):
+        acc, num_words, loss = evaluate_sentence(batch[0], model, loss_func)
         epoch_loss += loss
         epoch_acc += acc
         words += num_words

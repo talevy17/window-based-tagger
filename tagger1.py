@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import time
+from parser import Parser
 
 
 batch_size = 8
@@ -124,7 +125,13 @@ def iterate_model(model, train_set, validation_set):
 
 
 if __name__ == "__main__":
+    vocab_train = Parser('./data/pos/train')
+    vocab_valid = Parser('./data/pos/dev')
+    vocab_train.parse_sentences()
+    vocab_valid.parse_sentences()
+    L2I = vocab_train.get_l2i()
+    F2I = vocab_train.get_f2i()
     output_size = len(L2I)
-    vocab_size = len(vocab)
+    vocab_size = len(F2I)
     model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I)
-    iterate_model(model, train_set, validation_set)
+    iterate_model(model, vocab_train.get_tuples(), vocab_valid.get_tuples())

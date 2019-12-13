@@ -9,11 +9,11 @@ class Parser:
     def parse_sentences(self):
         sentence = []
         data = []
+        sentence.append('STARTT')
+        sentence.append('STARTT')
+        data.append(('STARTT', 'STARTT'))
+        data.append(('STARTT', 'STARTT'))
         for raw in self.file:
-            sentence.append('STARTT')
-            sentence.append('STARTT')
-            data.append(('STARTT', 'STARTT'))
-            data.append(('STARTT', 'STARTT'))
             raw_splitted = raw.split('\n')
             raw_splitted = raw_splitted[0].split(' ')
             word = raw_splitted[0]
@@ -26,6 +26,10 @@ class Parser:
                 self.tup.append(data)
                 sentence = []
                 data = []
+                sentence.append('STARTT')
+                sentence.append('STARTT')
+                data.append(('STARTT', 'STARTT'))
+                data.append(('STARTT', 'STARTT'))
                 continue
             label = raw_splitted[1]
             sentence.append(word)

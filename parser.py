@@ -35,10 +35,10 @@ class Parser:
         return self.word_vector
 
     def get_f2i(self):
-        return {f: i for i, f in enumerate(list(sorted([w[0] for w in self.word_vector])))}
+        return {f: i for i, f in enumerate(list(sorted(set([w[0] for w in self.word_vector]))))}
 
     def get_l2i(self):
-        return {l: i for i, l in enumerate(list(sorted([w[1] for w in self.word_vector])))}
+        return {l: i for i, l in enumerate(list(sorted(set([w[1] for w in self.word_vector]))))}
 
 
 if __name__ == '__main__':

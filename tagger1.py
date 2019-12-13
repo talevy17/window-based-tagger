@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import time
 from parser import Parser
+import numpy as np
 
 
 batch_size = 8
@@ -31,15 +32,21 @@ class Model(nn.Module):
     def embed_and_concat(self, x):
         concat_vector = []
         for word in x:
-            concat_vector.append(self.embedded(self.F2I[word]))
+            concat_vector.append(self.embedded(torch.tensor(self.F2I[word])))
         return torch.cat(tuple(concat_vector), 0)
 
     def forward(self, x):
         data = self.embed_and_concat(x)
         data = self.hidden(data)
-        data = nn.functional.tanh(data)
+        data = torch.tanh(data)
         data = self.out(data)
-        return nn.functional.softmax(data)
+        return nn.functional.softmax(data.reshape(1, -1), dim=1)
+
+
+def one_hot(label, size):
+    y_hot = np.zeros(size)
+    y_hot[label] = 1
+    return torch.from_numpy(y_hot.reshape(1, -1)).long()
 
 
 def time_for_epoch(start, end):
@@ -51,31 +58,32 @@ def time_for_epoch(start, end):
 
 def get_accuracy(prediction, y):
     winners = prediction.argmax(dim=1)
-    return winners == y.argmax(dim=1)  # convert into float for division
+    return winners == y(dim=1)
 
 
-def train_sentence(sentence, model, optimizer, loss_func):
+def train_sentence(sentence, model, optimizer, loss_func, L2I):
     acc = 0
     ep_loss = 0
+    label_size = len(L2I)
     for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
         optimizer.zero_grad()
         prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
-        loss = loss_func(prediction, w3[1])
-        acc += get_accuracy(prediction, w3[1])
+        loss = loss_func(prediction, one_hot(L2I[w3[1]], label_size))
+        acc += get_accuracy(prediction, L2I[w3[1]])
         ep_loss += loss
         loss.backward()
         optimizer.step()
     return acc, len(sentence) - 4, ep_loss
 
 
-def train(model, train_set, optimizer, loss_func, epoch):
+def train(model, train_set, optimizer, loss_func, epoch, L2I):
     epoch_loss = 0
     epoch_acc = 0
     words = 0
     model.train()
     print(f'Epoch: {epoch + 1:02} | Starting Training...')
-    for index, batch in enumerate(train_set):
-        acc, num_words, loss = train_sentence(batch[0], model, optimizer, loss_func)
+    for index, sentence in enumerate(train_set):
+        acc, num_words, loss = train_sentence(sentence, model, optimizer, loss_func, L2I)
         epoch_loss += loss
         epoch_acc += acc
         words += num_words
@@ -83,26 +91,27 @@ def train(model, train_set, optimizer, loss_func, epoch):
     return epoch_loss / words, epoch_acc / words
 
 
-def evaluate_sentence(sentence, model, loss_func):
+def evaluate_sentence(sentence, model, loss_func, L2I):
     acc = 0
     ep_loss = 0
+    label_size = len(L2I)
     with torch.no_grad():
         for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
             prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
-            loss = loss_func(prediction, w3[1])
-            acc += get_accuracy(prediction, w3[1])
+            loss = loss_func(prediction, one_hot(L2I[w3[1]], label_size))
+            acc += get_accuracy(prediction, L2I[w3[1]])
             ep_loss += loss
         return acc, len(sentence) - 4, ep_loss
 
 
-def evaluate(model, validation_set, loss_func, epoch):
+def evaluate(model, validation_set, loss_func, epoch, L2I):
     epoch_loss = 0
     epoch_acc = 0
     words = 0
     model.eval()
     print(f'Epoch: {epoch + 1:02} | Starting Evaluating...')
-    for index, batch in enumerate(validation_set):
-        acc, num_words, loss = evaluate_sentence(batch[0], model, loss_func)
+    for index, sentence in enumerate(validation_set):
+        acc, num_words, loss = evaluate_sentence(sentence, model, loss_func, L2I)
         epoch_loss += loss
         epoch_acc += acc
         words += num_words
@@ -110,13 +119,13 @@ def evaluate(model, validation_set, loss_func, epoch):
     return epoch_loss / words, epoch_acc / words
 
 
-def iterate_model(model, train_set, validation_set):
+def iterate_model(model, train_set, validation_set, L2I):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loss = nn.CrossEntropyLoss()
     for epoch in range(epochs):
         start_time = time.time()
-        train_loss, train_acc = train(model, train_set, optimizer, loss, epoch)
-        val_loss, val_acc = evaluate(model, validation_set, loss, epoch)
+        train_loss, train_acc = train(model, train_set, optimizer, loss, epoch, L2I)
+        val_loss, val_acc = evaluate(model, validation_set, loss, epoch, L2I)
         end_time = time.time()
         epoch_mins, epoch_secs = time_for_epoch(start_time, end_time)
         print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
@@ -134,4 +143,4 @@ if __name__ == "__main__":
     output_size = len(L2I)
     vocab_size = len(F2I)
     model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I)
-    iterate_model(model, vocab_train.get_tuples(), vocab_valid.get_tuples())
+    iterate_model(model, vocab_train.get_tuples(), vocab_valid.get_tuples(), L2I)

@@ -1,5 +1,14 @@
 import torch
 import torch.nn as nn
+import time
+
+
+batch_size = 8
+hidden_size = 100
+embedding_length = 50
+window_size = 5
+learning_rate = 0.01
+epochs = 10
 
 
 class Model(nn.Module):
@@ -18,16 +27,43 @@ class Model(nn.Module):
         self.hidden = nn.Linear(window_size * embedding_length, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
 
-    def concat(self, x):
+    def embed_and_concat(self, x):
         concat_vector = []
         for word in x:
             concat_vector.append(self.embedded(self.F2I[word]))
-        return tuple(concat_vector)
+        return torch.cat(tuple(concat_vector), 0)
 
     def forward(self, x):
-        data = torch.cat(self.concat(x), 0)
+        data = self.embed_and_concat(x)
         data = self.hidden(data)
         data = nn.functional.tanh(data)
         data = self.out(data)
         return nn.functional.softmax(data)
 
+
+def time_for_epoch(start, end):
+    end_to_end = end - start
+    minutes = int(end_to_end / 60)
+    seconds = int(end_to_end - (minutes * 60))
+    return minutes, seconds
+
+
+def iterate_model(model, train_set, validation_set):
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    loss = nn.CrossEntropyLoss()
+    for epoch in range(epochs):
+        start_time = time.time()
+        train_loss, train_acc = train(model, train_set, optimizer, loss, epoch)
+        val_loss, val_acc = evaluate(model, validation_set, loss, epoch)
+        end_time = time.time()
+        epoch_mins, epoch_secs = time_for_epoch(start_time, end_time)
+        print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
+        print(f'\tTrain Loss: {train_loss:.3f} | Train Acc: {train_acc * 100:.2f}%')
+        print(f'\t Val. Loss: {val_loss:.3f} |  Val. Acc: {val_acc * 100:.2f}%')
+
+
+if __name__ == "__main__":
+    output_size = len(L2I)
+    vocab_size = len(vocab)
+    model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I)
+    iterate_model(model, train_set, validation_set)

@@ -3,9 +3,9 @@
 class parser:
     def __init__(self, file):
        self.file = open(file, 'r')
-       self.dictionary ={}
-       self.dictionary['STARTT'] ='STARTT'
-       self.dictionary['ENDD'] ='ENDD'
+       self.tup =[]
+       self.tup.append(('STARTT', "STARTT"))
+       self.tup.append(('ENDD', "ENDD"))
        self.word_vector = []
 
     def parse_sentences(self):
@@ -24,7 +24,13 @@ class parser:
                 continue
             label = raw_splitted[1]
             sentence.append(word)
-            self.dictionary[word] = label
+            self.tup.append((word,label))
+
+    def get_tuples(self):
+        return self.tup
+
+    def get_sentences(self):
+        return self.word_vector
 
 if __name__ == '__main__':
     p = parser("./Dataset/pos/train")

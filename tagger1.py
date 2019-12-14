@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 
 
-batch_size = 100
+batch_size = 50
 hidden_size = 100
 embedding_length = 50
 window_size = 5
@@ -42,10 +42,14 @@ def time_for_epoch(start, end):
 
 def get_accuracy(prediction, y):
     acc = 0
+    red = 0
     for pred, label in zip(prediction, y):
         if pred.argmax() == label:
-            acc += 1
-    return acc / len(y)
+            if not I2L[int(label)] == 'O':
+                acc += 1
+            else:
+                red += 1
+    return acc / float(len(y) - red)
 
 
 def train(model, loader, optimizer, loss_func, epoch):
@@ -103,12 +107,13 @@ def make_loader(parser):
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vocab_train = Parser('./data/pos/train', window_size)
-    vocab_train.parse_sentences()
+    vocab_train = Parser('./data/ner/train', window_size)
+    vocab_train.parse_sentences('\t')
     L2I = vocab_train.get_l2i()
     F2I = vocab_train.get_f2i()
-    vocab_valid = Parser('./data/pos/dev', window_size, F2I, L2I)
-    vocab_valid.parse_sentences()
+    I2L = vocab_train.get_i2l()
+    vocab_valid = Parser('./data/ner/dev', window_size, F2I, L2I)
+    vocab_valid.parse_sentences('\t')
     output_size = len(L2I)
     vocab_size = len(F2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)

@@ -35,11 +35,11 @@ class Parser:
 			else:
 				self.window_sentences_labels[index] = l2i['']
 
-	def parse_sentences(self):
+	def parse_sentences(self, delimeter):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
-			raw_splitted = raw_splitted[0].split(' ')
+			raw_splitted = raw_splitted[0].split(delimeter)
 			word = raw_splitted[0]
 			if word != '':
 				label = raw_splitted[1]
@@ -72,6 +72,11 @@ class Parser:
 			self.L2I = {l: i for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
 			self.L2I[''] = len(self.L2I)
 		return self.L2I
+
+	def get_i2l(self):
+		i2l = {i: l for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
+		i2l[len(i2l)] = ''
+		return i2l
 
 
 if __name__ == '__main__':

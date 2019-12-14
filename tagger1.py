@@ -74,7 +74,7 @@ def train_sentence(sentence, model, optimizer, loss_func, L2I):
         prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
         prediction = prediction.to(device)
         label = one_hot(L2I[w3[1]], label_size)
-        loss = loss_func(prediction, label[0].to(device))
+        loss = loss_func(prediction, torch.tensor([L2I[w3[1]]]).to(device))
         acc += get_accuracy(prediction, L2I[w3[1]])
         ep_loss += loss
         loss.backward()
@@ -106,7 +106,7 @@ def evaluate_sentence(sentence, model, loss_func, L2I):
             prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
             prediction = prediction.to(device)
             label = one_hot(L2I[w3[1]], label_size)
-            loss = loss_func(prediction, label[0].to(device))
+            loss = loss_func(prediction, torch.tensor([L2I[w3[1]]]).to(device))
             acc += get_accuracy(prediction, L2I[w3[1]])
             ep_loss += loss
         return acc, len(sentence) - 4, ep_loss
@@ -143,7 +143,7 @@ def iterate_model(model, train_set, validation_set, L2I):
 
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vocab_train = Parser('./data/pos/train')
+    vocab_train = Parser('./data/train_5000')
     vocab_valid = Parser('./data/pos/dev')
     vocab_train.parse_sentences()
     vocab_valid.parse_sentences()

@@ -44,7 +44,7 @@ class Parser:
 				current_sentence.append((word, label))
 			else:
 				full_sentence = [('STARTT', 'STARTT'), ('STARTT', 'STARTT')] + current_sentence + [('ENDD', 'ENDD'),
-				                                                                                   ('ENDD', 'ENDD')]
+				('ENDD', 'ENDD')]
 				sentences, sentences_labels = self.create_window_list_from_sentence(full_sentence)
 				self.window_sentences.extend(sentences)
 				self.window_sentences_labels.extend(sentences_labels)
@@ -56,10 +56,12 @@ class Parser:
 	def get_sentences(self):
 		return self.window_sentences
 
+	def get_labels(self):
+		return self.window_sentences_labels
+
 	def get_f2i(self):
 		if not self.F2I:
-			self.F2I = {f: i for i, f in
-			            enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
+			self.F2I = {f: i for i, f in enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
 			self.F2I[''] = len(self.F2I)
 		return self.F2I
 

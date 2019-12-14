@@ -2,12 +2,11 @@ import torch
 import torch.nn as nn
 import time
 from parser import Parser
-from Sentences import Sentences
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 
 
-batch_size = 1
+batch_size = 15
 hidden_size = 100
 embedding_length = 50
 window_size = 5
@@ -16,38 +15,22 @@ epochs = 10
 
 
 class Model(nn.Module):
-    def __init__(self, batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size):
+    def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size):
         super(Model, self).__init__()
-        self.window_size = window_size
-        self.batch_size = batch_size
-        self.output_size = output_size
-        self.hidden_size = hidden_size
-        self.vocab_size = vocab_size
-        self.embedding_length = embedding_length
         torch.manual_seed(3)
-        self.embedded = nn.Embedding(vocab_size, embedding_length)
-        nn.init.uniform_(self.embedded.weight, -1.0, 1.0)
-        self.hidden = nn.Linear(window_size * embedding_length, hidden_size)
+        self.embed = nn.Embedding(vocab_size, embedding_length)
+        self.concat_size = window_size * embedding_length
+        nn.init.uniform_(self.embed.weight, -1.0, 1.0)
+        self.hidden = nn.Linear(self.concat_size, hidden_size)
         self.out = nn.Linear(hidden_size, output_size)
-
-    def embed_and_concat(self, x):
-        concat_vector = []
-        for word in x:
-            concat_vector.append(self.embedded(word))
-        return torch.cat(tuple(concat_vector), 0)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        data = self.embed_and_concat(x)
+        data = self.embed(x).view(-1, self.concat_size)
         data = self.hidden(data)
         data = torch.tanh(data)
         data = self.out(data)
-        return nn.functional.softmax(data.reshape(1, -1), dim=1)
-
-
-def one_hot(label, size):
-    y_hot = np.zeros(size)
-    y_hot[label] = 1
-    return torch.from_numpy(y_hot.reshape(-1, 1)).long()
+        return self.softmax(data)
 
 
 def time_for_epoch(start, end):
@@ -58,25 +41,22 @@ def time_for_epoch(start, end):
 
 
 def get_accuracy(prediction, y):
-    probs = torch.softmax(prediction, dim=1)
-    winners = probs.argmax(dim=1)
-    correct = (winners == y.argmax(dim=1)).float()  # convert into float for division
-    acc = correct.sum() / len(correct)
-    return acc
+    acc = 0
+    for pred, label in zip(prediction, y):
+        acc += pred.argmax() == label
+    return acc / len(y)
 
 
 def train(model, loader, optimizer, loss_func, epoch):
     epoch_loss = 0
     epoch_acc = 0
-    label_size = len(L2I)
     model.train()
     print(f'Epoch: {epoch + 1:02} | Starting Training...')
-    for batch in loader:
+    for x, y in loader:
         optimizer.zero_grad()
-        prediction = model(batch[0])
-        label = one_hot(batch[1], label_size)
-        loss = loss_func(prediction, label[0])
-        epoch_acc += get_accuracy(prediction, label[0])
+        prediction = model(x)
+        loss = loss_func(prediction, y)
+        epoch_acc += get_accuracy(prediction, y)
         epoch_loss += loss
         loss.backward()
         optimizer.step()
@@ -87,15 +67,13 @@ def train(model, loader, optimizer, loss_func, epoch):
 def evaluate(model, loader, loss_func, epoch):
     epoch_loss = 0
     epoch_acc = 0
-    label_size = len(L2I)
     model.eval()
     print(f'Epoch: {epoch + 1:02} | Starting Evaluation...')
     with torch.no_grad:
-        for batch in loader:
-            prediction = model(batch[0])
-            label = one_hot(batch[1], label_size)
-            loss = loss_func(prediction, label[0])
-            epoch_acc += get_accuracy(prediction, label[0])
+        for x, y in loader:
+            prediction = model(x)
+            loss = loss_func(prediction, y)
+            epoch_acc += get_accuracy(prediction, y)
             epoch_loss += loss
     print(f'Epoch: {epoch + 1:02} | Finished Evaluation')
     return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader)
@@ -116,20 +94,23 @@ def iterate_model(model, train_loader, validation_loader):
     return model
 
 
+def make_loader(parser):
+    x, y = parser.get_sentences(), parser.get_labels()
+    x, y = torch.from_numpy(np.array(x)), torch.from_numpy(np.array(y))
+    x, y = x.type(torch.long), y.type(torch.long)
+    return DataLoader(TensorDataset(x, y), batch_size, shuffle=True)
+
+
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vocab_train = Parser('./data/train_5000')
-    vocab_valid = Parser('./data/pos/dev')
+    vocab_train = Parser('./data/pos/train', window_size)
+    vocab_valid = Parser('./data/pos/dev', window_size)
     vocab_train.parse_sentences()
-    vocab_valid.parse_sentences()
     L2I = vocab_train.get_l2i()
     F2I = vocab_train.get_f2i()
-    vocab_valid.replace_non_vocab(F2I, L2I)
+    vocab_valid.parse_sentences(F2I, L2I)
     output_size = len(L2I)
     vocab_size = len(F2I)
-    model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size)
+    model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = model
-    train_loader = Sentences(vocab_train.get_sentences(), F2I, L2I, window_size)
-    valid_loader = Sentences(vocab_valid.get_sentences(), F2I, L2I, window_size)
-    model = iterate_model(model, DataLoader(train_loader, batch_size=batch_size, shuffle=True),
-                          DataLoader(valid_loader, batch_size=batch_size, shuffle=True))
+    model = iterate_model(model, make_loader(vocab_train), make_loader(vocab_valid))

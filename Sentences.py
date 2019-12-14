@@ -3,7 +3,7 @@ import torch
 import math
 
 
-class DataLoader(Dataset):
+class Sentences(Dataset):
     def __init__(self, data, F2I, L2I, window_size):
         self.data = data
         self.F2I = F2I

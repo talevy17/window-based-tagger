@@ -20,6 +20,16 @@ class Parser:
 			window_sentences_labels.append(curr_sentence_label)
 		return window_sentences, window_sentences_labels
 
+	def create_window_test_list_from_sentence(self, sentence_list):
+		window_sentences = list()
+		if len(sentence_list) < self.window_size:
+			raise ValueError("Sentences must be bigger then window size")
+		last_element = len(sentence_list) - self.window_size + 1
+		for i in range(last_element):
+			curr_sentence = [word for word in sentence_list[i:i + self.window_size]]
+			window_sentences.append(curr_sentence)
+		return window_sentences
+
 	def convert_sentences_to_indexes(self):
 		f2i = self.get_f2i()
 		l2i = self.get_l2i()
@@ -43,13 +53,29 @@ class Parser:
 			word = raw_splitted[0]
 			if word != '':
 				label = raw_splitted[1]
-				current_sentence.append((word, label))
+				current_sentence.append((word.lower(), label))
 			else:
 				full_sentence = [('STARTT', 'STARTT'), ('STARTT', 'STARTT')] + current_sentence + [('ENDD', 'ENDD'),
-				('ENDD', 'ENDD')]
+				                                                                                   ('ENDD', 'ENDD')]
 				sentences, sentences_labels = self.create_window_list_from_sentence(full_sentence)
 				self.window_sentences.extend(sentences)
 				self.window_sentences_labels.extend(sentences_labels)
+				current_sentence.clear()
+
+		# convert words to indexes
+		self.convert_sentences_to_indexes()
+
+	def parse_test_sentences(self):
+		current_sentence = list()
+		for raw in self.file:
+			raw_splitted = raw.split('\n')
+			word = raw_splitted[0]
+			if word != '':
+				current_sentence.append(word.lower())
+			else:
+				full_sentence = ['STARTT', 'STARTT'] + current_sentence + ['ENDD', 'ENDD']
+				sentences = self.create_window_test_list_from_sentence(full_sentence)
+				self.window_sentences.extend(sentences)
 				current_sentence.clear()
 
 		# convert words to indexes
@@ -63,7 +89,8 @@ class Parser:
 
 	def get_f2i(self):
 		if not self.F2I:
-			self.F2I = {f: i for i, f in enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
+			self.F2I = {f: i for i, f in
+			            enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
 			self.F2I[''] = len(self.F2I)
 		return self.F2I
 
@@ -80,5 +107,5 @@ class Parser:
 
 
 if __name__ == '__main__':
-	p = Parser("./Dataset/pos/train", window_size=5)
-	p.parse_sentences()
+	p = Parser("./Dataset/pos/test", window_size=5)
+	p.parse_test_sentences()

@@ -14,8 +14,9 @@ epochs = 10
 
 
 class Model(nn.Module):
-    def __init__(self, batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I):
+    def __init__(self, batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I, device):
         super(Model, self).__init__()
+        self.device = device
         self.F2I = F2I
         self.window_size = window_size
         self.batch_size = batch_size
@@ -33,9 +34,9 @@ class Model(nn.Module):
         concat_vector = []
         for word in x:
             if not word == '':
-                concat_vector.append(self.embedded(torch.tensor(self.F2I[word])))
+                concat_vector.append(self.embedded(torch.tensor(self.F2I[word]).to(self.device)))
             else:
-                concat_vector.append(torch.from_numpy(np.zeros(self.embedding_length)).float())
+                concat_vector.append(torch.from_numpy(np.zeros(self.embedding_length)).float().to(self.device))
         return torch.cat(tuple(concat_vector), 0)
 
     def forward(self, x):
@@ -71,8 +72,9 @@ def train_sentence(sentence, model, optimizer, loss_func, L2I):
     for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
         optimizer.zero_grad()
         prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
+        prediction = prediction.to(device)
         label = one_hot(L2I[w3[1]], label_size)
-        loss = loss_func(prediction, label[0])
+        loss = loss_func(prediction, label[0].to(device))
         acc += get_accuracy(prediction, L2I[w3[1]])
         ep_loss += loss
         loss.backward()
@@ -102,8 +104,9 @@ def evaluate_sentence(sentence, model, loss_func, L2I):
     with torch.no_grad():
         for w1, w2, w3, w4, w5 in zip(sentence[:-4], sentence[1:-3], sentence[2:-2], sentence[3:-1], sentence[4:]):
             prediction = model([w1[0], w2[0], w3[0], w4[0], w5[0]])
+            prediction = prediction.to(device)
             label = one_hot(L2I[w3[1]], label_size)
-            loss = loss_func(prediction, label[0])
+            loss = loss_func(prediction, label[0].to(device))
             acc += get_accuracy(prediction, L2I[w3[1]])
             ep_loss += loss
         return acc, len(sentence) - 4, ep_loss
@@ -139,7 +142,8 @@ def iterate_model(model, train_set, validation_set, L2I):
 
 
 if __name__ == "__main__":
-    vocab_train = Parser('./data/train_5000')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    vocab_train = Parser('./data/pos/train')
     vocab_valid = Parser('./data/pos/dev')
     vocab_train.parse_sentences()
     vocab_valid.parse_sentences()
@@ -148,5 +152,6 @@ if __name__ == "__main__":
     vocab_valid.replace_non_vocab(F2I, L2I)
     output_size = len(L2I)
     vocab_size = len(F2I)
-    model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I)
+    model = Model(batch_size, output_size, hidden_size, vocab_size, embedding_length, window_size, F2I, device)
+    model = model.to(device)
     iterate_model(model, vocab_train.get_tuples(), vocab_valid.get_tuples(), L2I)

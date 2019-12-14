@@ -1,40 +1,29 @@
 
 class Parser:
     def __init__(self, file):
-       self.file = open(file, 'r')
-       self.tup = []
-       self.word_vector = set()
+        self.file = open(file, 'r')
+        self.word_vector = []
 
     def parse_sentences(self):
-        data = []
-        self.word_vector.add(('STARTT', 'STARTT'))
-        self.word_vector.add(('ENDD', 'ENDD'))
-        data.append(('STARTT', 'STARTT'))
-        data.append(('STARTT', 'STARTT'))
+        self.word_vector.append(('STARTT', 'STARTT'))
+        self.word_vector.append(('STARTT', 'STARTT'))
         for raw in self.file:
             raw_splitted = raw.split('\n')
             raw_splitted = raw_splitted[0].split(' ')
             word = raw_splitted[0]
             if word == '':
-                data.append(('ENDD', 'ENDD'))
-                data.append(('ENDD', 'ENDD'))
-                self.tup.append(data)
-                data = []
-                data.append(('STARTT', 'STARTT'))
-                data.append(('STARTT', 'STARTT'))
+                self.word_vector.append(('ENDD', 'ENDD'))
+                self.word_vector.append(('ENDD', 'ENDD'))
+                self.word_vector.append(('STARTT', 'STARTT'))
+                self.word_vector.append(('STARTT', 'STARTT'))
                 continue
             label = raw_splitted[1]
-            self.word_vector.add((word, label))
-            data.append((word, label))
-
-    def get_tuples(self):
-        return self.tup
+            self.word_vector.append((word, label))
 
     def replace_non_vocab(self, vocab, labels):
-        for sentence in self.tup:
-            for i, w in enumerate(sentence):
-                if not w[0] in vocab or not w[1] in labels:
-                    sentence[i] = ('', '')
+        for i, w in enumerate(self.word_vector):
+            if not w[0] in vocab or not w[1] in labels:
+                self.word_vector[i] = ('', '')
 
     def get_sentences(self):
         return self.word_vector

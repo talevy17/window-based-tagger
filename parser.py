@@ -1,11 +1,11 @@
 class Parser:
-	def __init__(self, file, window_size):
+	def __init__(self, file, window_size, F2I={}, L2I={}):
 		self.file = open(file, 'r')
 		self.window_sentences = []
 		self.window_sentences_labels = []
 		self.window_size = window_size
-		self.F2I = {}
-		self.L2I = {}
+		self.F2I = F2I
+		self.L2I = L2I
 
 	def create_window_list_from_sentence(self, sentence_list):
 		window_sentences = list()
@@ -25,11 +25,17 @@ class Parser:
 		l2i = self.get_l2i()
 		for sentence in self.window_sentences:
 			for index, word in enumerate(sentence):
-				sentence[index] = f2i[word]
+				if word in f2i:
+					sentence[index] = f2i[word]
+				else:
+					sentence[index] = f2i['']
+		for index, label in enumerate(self.window_sentences_labels):
+			if label in l2i:
+				self.window_sentences_labels[index] = l2i[label]
+			else:
+				self.window_sentences_labels[index] = l2i['']
 
-		self.window_sentences_labels = [l2i[w] for w in self.window_sentences_labels]
-
-	def parse_sentences(self, f_vocab={}, l_vocab={}):
+	def parse_sentences(self):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
@@ -37,10 +43,6 @@ class Parser:
 			word = raw_splitted[0]
 			if word != '':
 				label = raw_splitted[1]
-				current_sentence.append((word, label))
-				# if given a vocab, check if the word exist in it. if not replace it with ('','')
-				if f_vocab and l_vocab and (word not in f_vocab or label not in l_vocab):
-					word, label = '', ''
 				current_sentence.append((word, label))
 			else:
 				full_sentence = [('STARTT', 'STARTT'), ('STARTT', 'STARTT')] + current_sentence + [('ENDD', 'ENDD'),

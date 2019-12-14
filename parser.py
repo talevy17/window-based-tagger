@@ -1,5 +1,4 @@
 
-
 class Parser:
     def __init__(self, file):
        self.file = open(file, 'r')
@@ -31,10 +30,10 @@ class Parser:
     def get_tuples(self):
         return self.tup
 
-    def replace_non_vocab(self, vocab):
+    def replace_non_vocab(self, vocab, labels):
         for sentence in self.tup:
             for i, w in enumerate(sentence):
-                if not w[0] in vocab:
+                if not w[0] in vocab or not w[1] in labels:
                     sentence[i] = ('', '')
 
     def get_sentences(self):

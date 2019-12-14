@@ -4,6 +4,8 @@ class Parser:
 		self.window_sentences = []
 		self.window_sentences_labels = []
 		self.window_size = window_size
+		self.F2I = {}
+		self.L2I = {}
 
 	def create_window_list_from_sentence(self, sentence_list):
 		window_sentences = list()
@@ -18,7 +20,16 @@ class Parser:
 			window_sentences_labels.append(curr_sentence_label)
 		return window_sentences, window_sentences_labels
 
-	def parse_sentences(self):
+	def convert_sentences_to_indexes(self):
+		f2i = self.get_f2i()
+		l2i = self.get_l2i()
+		for sentence in self.window_sentences:
+			for index, word in enumerate(sentence):
+				sentence[index] = f2i[word]
+
+		self.window_sentences_labels = [l2i[w] for w in self.window_sentences_labels]
+
+	def parse_sentences(self, f_vocab={}, l_vocab={}):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
@@ -26,6 +37,10 @@ class Parser:
 			word = raw_splitted[0]
 			if word != '':
 				label = raw_splitted[1]
+				current_sentence.append((word, label))
+				# if given a vocab, check if the word exist in it. if not replace it with ('','')
+				if f_vocab and l_vocab and (word not in f_vocab or label not in l_vocab):
+					word, label = '', ''
 				current_sentence.append((word, label))
 			else:
 				full_sentence = [('STARTT', 'STARTT'), ('STARTT', 'STARTT')] + current_sentence + [('ENDD', 'ENDD'),
@@ -35,23 +50,24 @@ class Parser:
 				self.window_sentences_labels.extend(sentences_labels)
 				current_sentence.clear()
 
-	def replace_non_vocab(self, vocab, labels):
-		for i, w in enumerate(self.window_sentences):
-			if not w[0] in vocab or not w[1] in labels:
-				self.window_sentences[i] = ('', '')
+		# convert words to indexes
+		self.convert_sentences_to_indexes()
 
 	def get_sentences(self):
 		return self.window_sentences
 
 	def get_f2i(self):
-		F2I = {f: i for i, f in enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
-		F2I[''] = len(F2I)
-		return F2I
+		if not self.F2I:
+			self.F2I = {f: i for i, f in
+			            enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
+			self.F2I[''] = len(self.F2I)
+		return self.F2I
 
 	def get_l2i(self):
-		L2I = {l: i for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
-		L2I[''] = len(L2I)
-		return L2I
+		if not self.L2I:
+			self.L2I = {l: i for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
+			self.L2I[''] = len(self.L2I)
+		return self.L2I
 
 
 if __name__ == '__main__':

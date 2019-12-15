@@ -21,6 +21,20 @@ class PreTrainedLoader:
         return self.i2f
 
 
+def sim(vector_a, vector_b):
+    return dot(vector_a, vector_b) / (norm(vector_a) * norm(vector_b))
+
+
+def top(k, key, weights, f2i):
+    results = []
+    word_vector = weights[f2i[key]]
+    for word, vector in zip(f2i.keys(), weights):
+        if not word == key:
+            results.append((sim(word_vector, vector), word))
+    results.sort(key=lambda x: x[0],  reverse=True)
+    return [element[1] for element in results[:k]]
+
+
 if __name__ == "__main__":
     loader = PreTrainedLoader('./Data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
     words = ['dog', 'england', 'john', 'explode', 'office']
@@ -28,17 +42,5 @@ if __name__ == "__main__":
     f2i = loader.get_dict()
     i2f = loader.get_i2f()
     for word in words:
-        results = np.zeros(len(f2i))
-        word_index = f2i[word]
-        word_vector = weights[word_index]
-        for index, vector in enumerate(weights):
-            if not index == word_index:
-                results[index] = dot(word_vector, vector) / norm(word_vector) * norm(vector)
-            else:
-                results[index] = np.inf
-        similars = []
-        for i in range(5):
-            index = np.argmin(results)
-            similars.append(i2f[index])
-            results[index] = np.inf
-        print(similars)
+        print(top(5, word, weights, f2i))
+

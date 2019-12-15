@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 
 
-batch_size = 50
+batch_size = 100
 hidden_size = 100
 embedding_length = 50
 window_size = 5

@@ -101,7 +101,7 @@ class Parser:
 		return self.L2I
 
 	def get_i2l(self):
-		i2l = {i: l for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
+		i2l = {i: l for l, i in self.L2I.items()}
 		i2l[len(i2l)] = ''
 		return i2l
 

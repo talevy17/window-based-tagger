@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import time
-from parser import Parser
+from Parser import Parser
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 

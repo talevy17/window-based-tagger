@@ -1,4 +1,4 @@
-from parser import Parser
+from Parser import Parser
 from top_k import PreTrainedLoader
 from tagger1 import make_loader, iterate_model
 import torch

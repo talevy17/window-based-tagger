@@ -48,7 +48,7 @@ class Parser:
 			else:
 				self.window_sentences_labels[index] = l2i['']
 
-	def parse_sentences(self, delimeter, convert_digits=False):
+	def parse_sentences(self, delimeter, convert_digits=True):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
@@ -73,7 +73,7 @@ class Parser:
 		# convert words to indexes
 		self.convert_sentences_to_indexes()
 
-	def parse_test_sentences(self, convert_digits=False):
+	def parse_test_sentences(self, convert_digits=True):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')

@@ -6,14 +6,6 @@ from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 
 
-batch_size = 100
-hidden_size = 100
-embedding_length = 50
-window_size = 5
-learning_rate = 0.01
-epochs = 10
-
-
 class Model(nn.Module):
     def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size):
         super(Model, self).__init__()
@@ -105,7 +97,13 @@ def make_loader(parser, batch_size):
     return DataLoader(TensorDataset(x, y), batch_size, shuffle=True)
 
 
-if __name__ == "__main__":
+def tagger_1():
+    batch_size = 100
+    hidden_size = 100
+    embedding_length = 50
+    window_size = 5
+    learning_rate = 0.01
+    epochs = 10
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_train = Parser('./data/ner/train', window_size)
     vocab_train.parse_sentences('\t')
@@ -120,3 +118,7 @@ if __name__ == "__main__":
     model = model
     model = iterate_model(model, make_loader(vocab_train, batch_size),
                           make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)
+
+
+if __name__ == "__main__":
+    tagger_1()

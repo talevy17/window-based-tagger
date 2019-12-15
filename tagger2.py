@@ -6,14 +6,6 @@ import torch.nn as nn
 import numpy as np
 
 
-batch_size = 100
-hidden_size = 100
-embedding_length = 50
-window_size = 5
-learning_rate = 0.01
-epochs = 10
-
-
 class Model(nn.Module):
     def __init__(self, output_size, hidden_size, embedding_length, window_size, weights):
         super(Model, self).__init__()
@@ -33,7 +25,13 @@ class Model(nn.Module):
         return self.softmax(data)
 
 
-if __name__ == "__main__":
+def tagger_2():
+    batch_size = 100
+    hidden_size = 100
+    embedding_length = 50
+    window_size = 5
+    learning_rate = 0.01
+    epochs = 10
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pretrained = PreTrainedLoader('./Data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
     F2I = pretrained.get_dict()
@@ -47,8 +45,11 @@ if __name__ == "__main__":
     vocab_valid = Parser('./data/pos/dev', window_size, F2I, L2I)
     vocab_valid.parse_sentences(' ')
     output_size = len(L2I)
-    vocab_size = len(F2I)
     model = Model(output_size, hidden_size, embedding_length, window_size, weights)
     model = model
     model = iterate_model(model, make_loader(vocab_train, batch_size),
                           make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)
+
+
+if __name__ == "__main__":
+    tagger_2()

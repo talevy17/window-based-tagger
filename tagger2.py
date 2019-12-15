@@ -39,11 +39,11 @@ def tagger_2():
     weights = pretrained.get_weights()
     weights = np.concatenate((weights, np.zeros((1, embedding_length))))
     vocab_train = Parser('./data/pos/train', window_size, F2I)
-    vocab_train.parse_sentences(' ')
+    vocab_train.parse_sentences()
     L2I = vocab_train.get_l2i()
     I2L = vocab_train.get_i2l()
     vocab_valid = Parser('./data/pos/dev', window_size, F2I, L2I)
-    vocab_valid.parse_sentences(' ')
+    vocab_valid.parse_sentences()
     output_size = len(L2I)
     model = Model(output_size, hidden_size, embedding_length, window_size, weights)
     model = model

@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4a2ed13-06f8-4208-b6b4-e8d79a8b5161" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tagger2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tagger1.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tagger2.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger2.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -135,7 +134,7 @@
       <updated>1576227380830</updated>
       <workItem from="1576227391085" duration="14535000" />
       <workItem from="1576312396407" duration="7247000" />
-      <workItem from="1576342851733" duration="16815000" />
+      <workItem from="1576342851733" duration="18141000" />
     </task>
     <servers />
   </component>
@@ -170,7 +169,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/tagger2.py</url>
-          <line>43</line>
+          <line>42</line>
           <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>

@@ -83,7 +83,7 @@ def evaluate(model, loader, loss_func, epoch, I2L):
     return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader)
 
 
-def iterate_model(model, train_loader, validation_loader, I2L):
+def iterate_model(model, train_loader, validation_loader, learning_rate, epochs, I2L):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loss = nn.CrossEntropyLoss()
     for epoch in range(epochs):
@@ -118,4 +118,5 @@ if __name__ == "__main__":
     vocab_size = len(F2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = model
-    model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size), I2L)
+    model = iterate_model(model, make_loader(vocab_train, batch_size),
+                          make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)

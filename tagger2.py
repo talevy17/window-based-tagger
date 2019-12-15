@@ -33,7 +33,6 @@ class Model(nn.Module):
         return self.softmax(data)
 
 
-
 if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pretrained = PreTrainedLoader('./Data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
@@ -51,4 +50,5 @@ if __name__ == "__main__":
     vocab_size = len(F2I)
     model = Model(output_size, hidden_size, embedding_length, window_size, weights)
     model = model
-    model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size), I2L)
+    model = iterate_model(model, make_loader(vocab_train, batch_size),
+                          make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)

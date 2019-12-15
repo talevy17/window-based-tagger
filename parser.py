@@ -1,3 +1,6 @@
+import re
+
+
 class Parser:
 	def __init__(self, file, window_size, F2I={}, L2I={}):
 		self.file = open(file, 'r')
@@ -45,15 +48,20 @@ class Parser:
 			else:
 				self.window_sentences_labels[index] = l2i['']
 
-	def parse_sentences(self, delimeter):
+	def parse_sentences(self, delimeter, convert_digits=False):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
 			raw_splitted = raw_splitted[0].split(delimeter)
 			word = raw_splitted[0]
 			if word != '':
+				# convert all chars to lower case.
+				word = word.lower()
+				# if we want to convert each digit to be DG for similarity, '300' = '400'.
+				if convert_digits:
+					word = re.sub('[0-9]', 'DG', word)
 				label = raw_splitted[1]
-				current_sentence.append((word.lower(), label))
+				current_sentence.append((word, label))
 			else:
 				full_sentence = [('STARTT', 'STARTT'), ('STARTT', 'STARTT')] + current_sentence + [('ENDD', 'ENDD'),
 				                                                                                   ('ENDD', 'ENDD')]
@@ -65,13 +73,18 @@ class Parser:
 		# convert words to indexes
 		self.convert_sentences_to_indexes()
 
-	def parse_test_sentences(self):
+	def parse_test_sentences(self, convert_digits=False):
 		current_sentence = list()
 		for raw in self.file:
 			raw_splitted = raw.split('\n')
 			word = raw_splitted[0]
 			if word != '':
-				current_sentence.append(word.lower())
+				# convert all chars to lower case.
+				word = word.lower()
+				# if we want to convert each digit to be DG for similarity, '300' = '400'.
+				if convert_digits:
+					word = re.sub('[0-9]', 'DG', word)
+				current_sentence.append(word)
 			else:
 				full_sentence = ['STARTT', 'STARTT'] + current_sentence + ['ENDD', 'ENDD']
 				sentences = self.create_window_test_list_from_sentence(full_sentence)
@@ -108,4 +121,4 @@ class Parser:
 
 if __name__ == '__main__':
 	p = Parser("./Dataset/pos/test", window_size=5)
-	p.parse_test_sentences()
+	p.parse_test_sentences(convert_digits=True)

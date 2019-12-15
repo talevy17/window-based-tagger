@@ -40,7 +40,7 @@ def time_for_epoch(start, end):
     return minutes, seconds
 
 
-def get_accuracy(prediction, y):
+def get_accuracy(prediction, y, I2L):
     acc = 0
     red = 0
     for pred, label in zip(prediction, y):
@@ -52,7 +52,7 @@ def get_accuracy(prediction, y):
     return acc / float(len(y) - red)
 
 
-def train(model, loader, optimizer, loss_func, epoch):
+def train(model, loader, optimizer, loss_func, epoch, I2L):
     epoch_loss = 0
     epoch_acc = 0
     model.train()
@@ -61,7 +61,7 @@ def train(model, loader, optimizer, loss_func, epoch):
         optimizer.zero_grad()
         prediction = model(x)
         loss = loss_func(prediction, y)
-        epoch_acc += get_accuracy(prediction, y)
+        epoch_acc += get_accuracy(prediction, y, I2L)
         epoch_loss += loss
         loss.backward()
         optimizer.step()
@@ -69,7 +69,7 @@ def train(model, loader, optimizer, loss_func, epoch):
     return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader), model
 
 
-def evaluate(model, loader, loss_func, epoch):
+def evaluate(model, loader, loss_func, epoch, I2L):
     epoch_loss = 0
     epoch_acc = 0
     model.eval()
@@ -77,19 +77,19 @@ def evaluate(model, loader, loss_func, epoch):
     for x, y in loader:
         prediction = model(x)
         loss = loss_func(prediction, y)
-        epoch_acc += get_accuracy(prediction, y)
+        epoch_acc += get_accuracy(prediction, y, I2L)
         epoch_loss += loss
     print(f'Epoch: {epoch + 1:02} | Finished Evaluation')
     return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader)
 
 
-def iterate_model(model, train_loader, validation_loader):
+def iterate_model(model, train_loader, validation_loader, I2L):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     loss = nn.CrossEntropyLoss()
     for epoch in range(epochs):
         start_time = time.time()
-        train_loss, train_acc, model = train(model, train_loader, optimizer, loss, epoch)
-        val_loss, val_acc = evaluate(model, validation_loader, loss, epoch)
+        train_loss, train_acc, model = train(model, train_loader, optimizer, loss, epoch, I2L)
+        val_loss, val_acc = evaluate(model, validation_loader, loss, epoch, I2L)
         end_time = time.time()
         epoch_mins, epoch_secs = time_for_epoch(start_time, end_time)
         print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
@@ -98,7 +98,7 @@ def iterate_model(model, train_loader, validation_loader):
     return model
 
 
-def make_loader(parser):
+def make_loader(parser, batch_size):
     x, y = parser.get_sentences(), parser.get_labels()
     x, y = torch.from_numpy(np.array(x)), torch.from_numpy(np.array(y))
     x, y = x.type(torch.long), y.type(torch.long)
@@ -118,4 +118,4 @@ if __name__ == "__main__":
     vocab_size = len(F2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = model
-    model = iterate_model(model, make_loader(vocab_train), make_loader(vocab_valid))
+    model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size), I2L)

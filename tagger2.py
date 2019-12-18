@@ -9,10 +9,8 @@ import numpy as np
 class Model(nn.Module):
 	def __init__(self, output_size, hidden_size, embedding_length, window_size, weights):
 		super(Model, self).__init__()
-		torch.manual_seed(3)
 		self.embed = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=False)
 		self.concat_size = window_size * embedding_length
-		nn.init.uniform_(self.embed.weight, -1.0, 1.0)
 		self.hidden = nn.Linear(self.concat_size, hidden_size)
 		self.out = nn.Linear(hidden_size, output_size)
 		self.softmax = nn.Softmax(dim=1)

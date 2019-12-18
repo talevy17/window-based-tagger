@@ -79,14 +79,17 @@ class Parser:
 				# if we want to convert each digit to be DG for similarity, '300' = '400'.
 				if convert_digits:
 					word = re.sub('[0-9]', 'DG', word)
-				label = raw_splitted[1]
+				if self.data_kind != "test":
+					label = raw_splitted[1]
+					current_sentence_labels.append(label)
 				current_sentence_words.append(word)
-				current_sentence_labels.append(label)
 			else:
 				full_sentence_words = [START, START] + current_sentence_words + [END, END]
 				self.sentences_words.append(full_sentence_words)
-				full_sentence_labels = [START, START] + current_sentence_labels + [END, END]
-				self.sentences_labels.append(full_sentence_labels)
+
+				if self.data_kind != "test":
+					full_sentence_labels = [START, START] + current_sentence_labels + [END, END]
+					self.sentences_labels.append(full_sentence_labels)
 
 				current_sentence_words.clear()
 				current_sentence_labels.clear()
@@ -100,14 +103,14 @@ class Parser:
 	def get_f2i(self):
 		if not self.F2I:
 			self.F2I = {f: i for i, f in
-			            enumerate(list(sorted(set([w for sublist in self.sentences_words for w in sublist]))))}
+						enumerate(list(sorted(set([w for sublist in self.sentences_words for w in sublist]))))}
 			self.F2I[UNKNOWN] = len(self.F2I)
 		return self.F2I
 
 	def get_l2i(self):
 		if not self.L2I:
 			self.L2I = {l: i for i, l in
-			            enumerate(list(sorted(set([w for sublist in self.sentences_labels for w in sublist]))))}
+						enumerate(list(sorted(set([w for sublist in self.sentences_labels for w in sublist]))))}
 			self.L2I[UNKNOWN] = len(self.L2I)
 		return self.L2I
 

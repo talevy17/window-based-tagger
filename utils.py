@@ -1,15 +1,16 @@
-from Parser import Parser
 from top_k import PreTrainedLoader
-import tagger1, tagger2, tagger3
 import torch
-import torch.nn as nn
 import numpy as np
-from torch.utils.data import DataLoader, TensorDataset
 
 
-def predict_by_windows(model, windows):
-	predictions = list()
-	for input in windows:
-		y = tr.argmax(model(Variable(tr.LongTensor(input))).data)
-		predictions.append(y)
-	return predictions
+def predict_by_windows(model, windows, file_type, L2I):
+    with open('test_{0}.txt'.format(file_type), mode='w') as file:
+        predictions = list()
+        for input in windows:
+            y = model(input[0])
+            _, y = torch.max(y, 1)
+            y = L2I[int(y)]
+            predictions.append(y)
+            file.write("{0}\n".format(y))
+    file.close()
+    return predictions

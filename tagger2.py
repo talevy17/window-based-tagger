@@ -1,4 +1,4 @@
-from DataUtils import Parser, FromPreTrained
+from DataUtils import DataReader, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
@@ -30,14 +30,14 @@ def tagger_2():
     embeddings = FromPreTrained('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
     word_to_idx = embeddings.get_word_to_idx()
     weights = embeddings.get_embeddings()
-    train_data = Parser(window_size, F2I=word_to_idx)
+    train_data = DataReader(window_size, F2I=word_to_idx)
     L2I = train_data.get_l2i()
     I2L = train_data.get_i2l()
-    dev_data = Parser(window_size, data_kind="dev", F2I=word_to_idx, L2I=L2I)
+    dev_data = DataReader(window_size, data_kind="dev", F2I=word_to_idx, L2I=L2I)
     output_size = len(L2I)
     model = Model(output_size, hidden_size, embedding_length, window_size, weights)
     model = trainer_loop(model, train_data.data_loader(batch_size),
-                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":

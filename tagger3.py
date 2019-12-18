@@ -1,5 +1,5 @@
 from torch.autograd import Variable
-from DataUtils import Parser, FromPreTrained
+from DataUtils import DataReader, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
@@ -82,13 +82,13 @@ def tagger_3():
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    train_data = Parser(window_size, data_name='ner')
+    train_data = DataReader(window_size, data_name='ner')
     L2I = train_data.get_l2i()
     F2I = train_data.get_f2i()
     I2L = train_data.get_i2l()
     I2F = train_data.get_i2f()
 
-    dev_data = Parser(window_size, "ner", "dev", F2I, L2I)
+    dev_data = DataReader(window_size, "ner", "dev", F2I, L2I)
     create_pre_suff_dicts(prefix_size, suffix_size, dev_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)
@@ -97,7 +97,7 @@ def tagger_3():
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
                   suffix_vocab_size)
     model = trainer_loop(model, train_data.data_loader(batch_size),
-                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":

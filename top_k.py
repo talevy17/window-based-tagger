@@ -1,6 +1,6 @@
 
 import numpy as np
-from DataUtils import FromPreTrained
+from DataUtils import FromPreTrained, UNKNOWN
 
 
 def cosine_distance(a, b):
@@ -11,14 +11,14 @@ def get_k_nearest(k, anchor, weights, word_to_idx):
     results = []
     embedded_anchor = weights[word_to_idx[anchor]]
     for word, weight in zip(word_to_idx.keys(), weights):
-        if not word == anchor:
+        if not (word == anchor or word == UNKNOWN):
             results.append((cosine_distance(embedded_anchor, weight), word))
     results.sort(key=lambda item: item[0], reverse=True)
     return [item[1] for item in results[:k]]
 
 
 def top_k():
-    embed = FromPreTrained('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
+    embed = FromPreTrained('embeddings.txt', 'words.txt')
     weights = embed.get_embeddings()
     word_to_idx = embed.get_word_to_idx()
     for word in ['dog', 'england', 'john', 'explode', 'office']:

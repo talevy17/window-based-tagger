@@ -7,7 +7,7 @@ END = "*END*"
 UNKNOWN = '*UNKNOWN*'
 
 
-class Parser:
+class DataReader:
     def __init__(self, window_size, data_name='pos', data_kind="train", F2I={}, L2I={}, to_lower=True):
         with open("./Data/{0}/{1}".format(data_name, data_kind), 'r') as file:
             data = file.readlines()
@@ -16,10 +16,10 @@ class Parser:
         sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower)
         self.F2I = F2I if F2I else self.create_dict(sentences)
         self.L2I = L2I if L2I else self.create_dict(labels)
-        self.create_windows_list_from_sentences(sentences, labels, window_size, data_kind)
-        self.convert_sentences_windows_to_indexes(data_kind)
+        self.create_windows(sentences, labels, window_size, data_kind)
+        self.convert_to_indexes(data_kind)
 
-    def create_windows_list_from_sentences(self, sentences, labels, window_size, data_kind):
+    def create_windows(self, sentences, labels, window_size, data_kind):
         for sentence in sentences:
             if len(sentence) < window_size:
                 raise ValueError("Sentences must be bigger then window size")
@@ -37,7 +37,7 @@ class Parser:
                     curr_sentence_label = label[i + window_size // 2]
                     self.window_labels.append(curr_sentence_label)
 
-    def convert_sentences_windows_to_indexes(self, data_kind):
+    def convert_to_indexes(self, data_kind):
         f2i = self.get_f2i()
         l2i = self.get_l2i()
         for sentence in self.windows:
@@ -113,11 +113,10 @@ class Parser:
 
 class FromPreTrained:
     def __init__(self, vectors, vocab):
-        word_vectors = np.loadtxt(vectors)
+        word_vectors = np.loadtxt("./Data/pretrained/{0}".format(vectors))
         self.embeddings = np.concatenate((word_vectors, np.zeros((1, len(word_vectors[0])))))
-        file = open(vocab, 'r')
-        self.corpus = {f.split('\n')[0]: i for i, f in enumerate(file)}
-        file.close()
+        with open("./Data/pretrained/{0}".format(vocab), 'r') as file:
+            self.corpus = {f.split('\n')[0]: i for i, f in enumerate(file)}
         self.corpus[UNKNOWN] = len(self.corpus)
         self.idx_to_word = {i: f for f, i in self.corpus.items()}
 
@@ -129,8 +128,4 @@ class FromPreTrained:
 
     def get_idx_to_word(self):
         return self.idx_to_word
-
-
-if __name__ == '__main__':
-    p = Parser(window_size=5, data_name='ner')
 

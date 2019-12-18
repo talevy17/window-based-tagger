@@ -3,6 +3,7 @@ import re
 START = "*START*"
 END = "*END*"
 UNKNOWN = '*UNKNOWN*'
+NUMBER = '*DG*'
 
 
 def get_file_directory(data_name, data_kind):
@@ -23,8 +24,8 @@ class Parser:
 		self.is_pos = (data_name == 'pos')
 		self.data_kind = data_kind
 
-	def parse_to_indexed_windows(self, convert_digits=True, to_lower=True):
-		self.parse_sentences(convert_digits=True, to_lower=True)
+	def parse_to_indexed_windows(self, convert_digits=False, to_lower=False):
+		self.parse_sentences(convert_digits=convert_digits, to_lower=to_lower)
 		self.create_windows_list_from_sentences()
 		self.convert_sentences_windows_to_indexes()
 
@@ -63,7 +64,7 @@ class Parser:
 				else:
 					self.window_sentences_labels[index] = l2i[UNKNOWN]
 
-	def parse_sentences(self, convert_digits=True, to_lower=True):
+	def parse_sentences(self, convert_digits=False, to_lower=False):
 		# parse by spaces if post, if ner parse by tab.
 		delimiter = ' ' if self.is_pos else '\t'
 		current_sentence_words = list()

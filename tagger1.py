@@ -9,6 +9,13 @@ import numpy as np
 
 from utils import predict_by_windows
 
+batch_size = 1000
+hidden_size = 100
+embedding_length = 50
+window_size = 5
+learning_rate = 0.01
+epochs = 2
+
 
 class Model(nn.Module):
     def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size):
@@ -40,17 +47,30 @@ def time_for_epoch(start, end):
 
 
 def get_accuracy(prediction, y, I2L):
-    acc = 0
-    size = float(len(y))
-    for pred, label in zip(prediction, y):
-        if pred.argmax() == label:
-            if not I2L[int(label)] == 'O':
-                acc += 1
-            else:
-                size -= 1
-    if size == 0:
-        return 0
-    return acc / size
+    good, bad = 0, 0
+    # count number of good and bad predictions
+    for i in range(len(y)):
+        if prediction[i].argmax() == y[i]:
+            if I2L[int(y[i])] != 'O':
+                good += 1
+        else:
+            bad += 1
+
+    # returns number of good and bad predictions along with the accuracy rate
+    return good / (good + bad)
+
+
+# acc = 0
+# size = float(len(y))
+# for pred, label in zip(prediction, y):
+#     if pred.argmax() == label:
+#         if not I2L[int(label)] == 'O':
+#             acc += 1
+#         else:
+#             size -= 1
+# if size == 0:
+#     return 0
+# return acc / size
 
 
 def train(model, loader, optimizer, loss_func, epoch, I2L):
@@ -84,8 +104,8 @@ def evaluate(model, loader, loss_func, epoch, I2L):
     return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader)
 
 
-def iterate_model(model, train_loader, validation_loader, learning_rate, epochs, I2L):
-    with open('tagger1_epochs_accuracy_ner.csv', mode='w') as file:
+def iterate_model(model, train_loader, validation_loader, I2L):
+    with open('./data/tagger1_epochs{0}_batchsize{1}_h{2}_ner.csv'.format(epochs, batch_size,hidden_size), mode='w') as file:
         fieldnames = ['Epoch Number', 'Train Loss', 'Train Accuracy', 'Val. Loss', 'Val Accuracy']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -119,13 +139,8 @@ def make_test_loader(parser):
     x = x.type(torch.long)
     return DataLoader(TensorDataset(x), 1, shuffle=False)
 
+
 def tagger_1():
-    batch_size = 2000
-    hidden_size = 100
-    embedding_length = 50
-    window_size = 5
-    learning_rate = 0.01
-    epochs = 1
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_train = Parser(window_size, data_name="ner")
     vocab_train.parse_to_indexed_windows()
@@ -139,10 +154,10 @@ def tagger_1():
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = model
     model = iterate_model(model, make_loader(vocab_train, batch_size),
-                          make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)
+                          make_loader(vocab_valid, batch_size), I2L)
     test_parser = Parser(window_size, 'ner', 'test')
     test_parser.parse_to_indexed_windows()
-    predict_by_windows(model, make_test_loader(test_parser), 'ner',I2L)
+    predict_by_windows(model, make_test_loader(test_parser), 'ner', I2L)
 
 
 if __name__ == "__main__":

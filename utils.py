@@ -2,7 +2,7 @@ import torch
 
 
 def predict_by_windows(model, windows, file_type, L2I):
-    with open('test_{0}.txt'.format(file_type), mode='w') as file:
+    with open('./data/test_{0}.txt'.format(file_type), mode='w') as file:
         predictions = list()
         for input in windows:
             y = model(input[0])

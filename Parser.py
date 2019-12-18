@@ -59,7 +59,7 @@ class Parser:
 			raw_splitted = raw.split('\n')
 			raw_splitted = raw_splitted[0].split(delimiter)
 			word = raw_splitted[0]
-			if word != UNKNOWN:
+			if word != '':
 				# convert all chars to lower case.
 				word = word.lower()
 				# if we want to convert each digit to be DG for similarity, '300' = '400'.
@@ -109,23 +109,23 @@ class Parser:
 		if not self.F2I:
 			self.F2I = {f: i for i, f in
 			            enumerate(list(sorted(set([w for sublist in self.window_sentences for w in sublist]))))}
-			self.F2I[''] = len(self.F2I)
+			self.F2I[UNKNOWN] = len(self.F2I)
 		return self.F2I
 
 	def get_l2i(self):
 		if not self.L2I:
 			self.L2I = {l: i for i, l in enumerate(list(sorted(set([w for w in self.window_sentences_labels]))))}
-			self.L2I[''] = len(self.L2I)
+			self.L2I[UNKNOWN] = len(self.L2I)
 		return self.L2I
 
 	def get_i2l(self):
 		i2l = {i: l for l, i in self.L2I.items()}
-		i2l[len(i2l)] = ''
+		# i2l[len(i2l)] = ''
 		return i2l
 
 	def get_i2f(self):
 		i2f = {i: l for l, i in self.F2I.items()}
-		i2f[len(i2f)] = ''
+		# i2f[len(i2f)] = ''
 		return i2f
 
 

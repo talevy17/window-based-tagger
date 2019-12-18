@@ -1,6 +1,4 @@
-from top_k import PreTrainedLoader
 import torch
-import numpy as np
 
 
 def predict_by_windows(model, windows, file_type, L2I):
@@ -14,3 +12,10 @@ def predict_by_windows(model, windows, file_type, L2I):
             file.write("{0}\n".format(y))
     file.close()
     return predictions
+
+def save_model_to_path(model, path="./data/model"):
+	torch.save(model.state_dict(), path)
+
+
+def load_model_from_path(model, path="./data/model"):
+	model.load_state_dict(torch.load(path))

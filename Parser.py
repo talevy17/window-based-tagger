@@ -23,7 +23,7 @@ class Parser:
 		self.is_pos = (data_name == 'pos')
 		self.data_kind = data_kind
 
-	def parse_sentences_to_window_indexes(self, convert_digits=True, to_lower=True):
+	def parse_to_indexed_windows(self, convert_digits=True, to_lower=True):
 		self.parse_sentences(convert_digits=True, to_lower=True)
 		self.create_windows_list_from_sentences()
 		self.convert_sentences_windows_to_indexes()

@@ -1,5 +1,5 @@
 from torch.autograd import Variable
-from DataUtils import Parser, PreTrainedLoader, data_loader
+from DataUtils import Parser, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
@@ -15,10 +15,10 @@ class Model(nn.Module):
         super(Model, self).__init__()
         torch.manual_seed(3)
         self.embed = nn.Embedding(vocab_size, embedding_length)
-        self.embed_prefix = nn.Embedding(prefix_size, embedding_length)
-        self.embed_suffix = nn.Embedding(suffix_size, embedding_length)
         nn.init.uniform_(self.embed.weight, -1.0, 1.0)
+        self.embed_prefix = nn.Embedding(prefix_size, embedding_length)
         nn.init.uniform_(self.embed_prefix.weight, -1.0, 1.0)
+        self.embed_suffix = nn.Embedding(suffix_size, embedding_length)
         nn.init.uniform_(self.embed_suffix.weight, -1.0, 1.0)
         self.input_dim = window_size * embedding_length
         self.non_linear = nn.Sequential(nn.Linear(self.input_dim, hidden_size), nn.Tanh())
@@ -82,24 +82,24 @@ def tagger_3():
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    vocab_train = Parser(window_size, data_name='ner')
-    vocab_train.parse_to_indexed_windows()
-    L2I = vocab_train.get_l2i()
-    F2I = vocab_train.get_f2i()
-    I2L = vocab_train.get_i2l()
-    I2F = vocab_train.get_i2f()
+    train_data = Parser(window_size, data_name='ner')
+    train_data.parse_to_indexed_windows()
+    L2I = train_data.get_l2i()
+    F2I = train_data.get_f2i()
+    I2L = train_data.get_i2l()
+    I2F = train_data.get_i2f()
 
-    vocab_valid = Parser(window_size, "ner", "dev", F2I, L2I)
-    vocab_valid.parse_to_indexed_windows()
-    create_pre_suff_dicts(prefix_size, suffix_size, vocab_valid.get_sentences(), I2F)
+    dev_data = Parser(window_size, "ner", "dev", F2I, L2I)
+    dev_data.parse_to_indexed_windows()
+    create_pre_suff_dicts(prefix_size, suffix_size, dev_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)
     prefix_vocab_size = len(PRE2I)
     suffix_vocab_size = len(SUF2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
                   suffix_vocab_size)
-    model = trainer_loop(model, data_loader(vocab_train, batch_size),
-                          data_loader(vocab_valid, batch_size), I2L, learning_rate, epochs)
+    model = trainer_loop(model, train_data.data_loader(batch_size),
+                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":

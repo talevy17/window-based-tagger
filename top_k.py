@@ -1,6 +1,6 @@
 
 import numpy as np
-from DataUtils import PreTrainedLoader
+from DataUtils import FromPreTrained
 
 
 def cosine_distance(a, b):
@@ -18,10 +18,10 @@ def get_k_nearest(k, anchor, weights, word_to_idx):
 
 
 def top_k():
-    embed = PreTrainedLoader('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
+    embed = FromPreTrained('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
     words = ['dog', 'england', 'john', 'explode', 'office']
-    weights = embed.get_weights()
-    word_to_idx = embed.get_dict()
+    weights = embed.get_embeddings()
+    word_to_idx = embed.get_word_to_idx()
     for word in words:
         print(get_k_nearest(5, word, weights, word_to_idx))
 

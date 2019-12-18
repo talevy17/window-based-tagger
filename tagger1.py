@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from ModelTrainer import trainer_loop
-from DataUtils import Parser, data_loader
+from DataUtils import Parser
 
 
 class Model(nn.Module):
@@ -29,18 +29,18 @@ def tagger_1():
     window_size = 5
     learning_rate = 0.01
     epochs = 10
-    vocab_train = Parser(window_size)
-    vocab_train.parse_to_indexed_windows()
-    label_to_idx = vocab_train.get_l2i()
-    word_to_idx = vocab_train.get_f2i()
-    idx_to_label = vocab_train.get_i2l()
-    vocab_valid = Parser(window_size, 'pos', "train", word_to_idx, label_to_idx)
-    vocab_valid.parse_to_indexed_windows()
+    train_data = Parser(window_size)
+    train_data.parse_to_indexed_windows()
+    label_to_idx = train_data.get_l2i()
+    word_to_idx = train_data.get_f2i()
+    idx_to_label = train_data.get_i2l()
+    dev_data = Parser(window_size, 'pos', "train", word_to_idx, label_to_idx)
+    dev_data.parse_to_indexed_windows()
     output_size = len(label_to_idx)
     vocab_size = len(word_to_idx)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
-    model = trainer_loop(model, data_loader(vocab_train, batch_size),
-                          data_loader(vocab_valid, batch_size), idx_to_label, learning_rate, epochs)
+    model = trainer_loop(model, train_data.data_loader(batch_size),
+                          dev_data.data_loader(batch_size), idx_to_label, learning_rate, epochs)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from DataUtils import Parser, PreTrainedLoader, data_loader
+from DataUtils import Parser, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
@@ -28,20 +28,19 @@ def tagger_2():
     window_size = 5
     learning_rate = 0.01
     epochs = 10
-    pretrained = PreTrainedLoader('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
-    F2I = pretrained.get_dict()
-    weights = pretrained.get_weights()
-    weights = np.concatenate((weights, np.zeros((1, embedding_length))))
-    vocab_train = Parser(window_size, F2I=F2I)
-    vocab_train.parse_to_indexed_windows()
-    L2I = vocab_train.get_l2i()
-    I2L = vocab_train.get_i2l()
-    vocab_valid = Parser(window_size, data_kind="dev", F2I=F2I, L2I=L2I)
-    vocab_valid.parse_to_indexed_windows()
+    embeddings = FromPreTrained('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
+    word_to_idx = embeddings.get_word_to_idx()
+    weights = embeddings.get_embeddings()
+    train_data = Parser(window_size, F2I=word_to_idx)
+    train_data.parse_to_indexed_windows()
+    L2I = train_data.get_l2i()
+    I2L = train_data.get_i2l()
+    dev_data = Parser(window_size, data_kind="dev", F2I=word_to_idx, L2I=L2I)
+    dev_data.parse_to_indexed_windows()
     output_size = len(L2I)
     model = Model(output_size, hidden_size, embedding_length, window_size, weights)
-    model = trainer_loop(model, data_loader(vocab_train, batch_size),
-                          data_loader(vocab_valid, batch_size), I2L, learning_rate, epochs)
+    model = trainer_loop(model, train_data.data_loader(batch_size),
+                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":

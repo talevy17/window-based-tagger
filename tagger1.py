@@ -1,3 +1,5 @@
+import csv
+
 import torch
 import torch.nn as nn
 import time
@@ -81,19 +83,24 @@ def evaluate(model, loader, loss_func, epoch, I2L):
 
 
 def iterate_model(model, train_loader, validation_loader, learning_rate, epochs, I2L):
-	# with open('tagger1_epochs_accuracy.csv', mode= 'w'):
-	# 	filed
-	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-	loss = nn.CrossEntropyLoss()
-	for epoch in range(epochs):
-		start_time = time.time()
-		train_loss, train_acc, model = train(model, train_loader, optimizer, loss, epoch, I2L)
-		val_loss, val_acc = evaluate(model, validation_loader, loss, epoch, I2L)
-		end_time = time.time()
-		epoch_mins, epoch_secs = time_for_epoch(start_time, end_time)
-		print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
-		print(f'\tTrain Loss: {train_loss:.3f} | Train Acc: {train_acc * 100:.2f}%')
-		print(f'\t Val. Loss: {val_loss:.3f} |  Val. Acc: {val_acc * 100:.2f}%')
+	with open('tagger1_epochs_accuracy_ner.csv', mode= 'w') as file:
+		fieldnames = ['Epoch Number', 'Train Loss', 'Train Accuracy', 'Val. Loss', 'Val Accuracy']
+		writer = csv.DictWriter(file, fieldnames = fieldnames)
+		optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+		loss = nn.CrossEntropyLoss()
+		for epoch in range(epochs):
+			start_time = time.time()
+			train_loss, train_acc, model = train(model, train_loader, optimizer, loss, epoch, I2L)
+			val_loss, val_acc = evaluate(model, validation_loader, loss, epoch, I2L)
+			end_time = time.time()
+			epoch_mins, epoch_secs = time_for_epoch(start_time, end_time)
+			print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
+			print(f'\tTrain Loss: {train_loss:.3f} | Train Acc: {train_acc * 100:.2f}%')
+			print(f'\t Val. Loss: {val_loss:.3f} |  Val. Acc: {val_acc * 100:.2f}%')
+			writer.writerow({'Epoch Number': str(epoch+1), 'Train Loss': str(train_loss),
+							 'Train Accuracy':str(train_acc*100) , 'Val. Loss':str(val_loss),
+							 'Val Accuracy': str(val_acc*100)})
+	file.close()
 	return model
 
 
@@ -106,7 +113,7 @@ def make_loader(parser, batch_size):
 
 def tagger_1():
 	batch_size = 30
-	hidden_size = 200
+	hidden_size = 100
 	embedding_length = 50
 	window_size = 5
 	learning_rate = 0.01

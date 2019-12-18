@@ -1,4 +1,4 @@
-from Parser import Parser
+from Parser import Parser, UNKNOWN
 from top_k import PreTrainedLoader
 from tagger1 import make_loader, iterate_model
 import torch
@@ -35,7 +35,7 @@ def tagger_2():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pretrained = PreTrainedLoader('./Data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
     F2I = pretrained.get_dict()
-    F2I[''] = len(F2I)
+    F2I[UNKNOWN] = len(F2I)
     weights = pretrained.get_weights()
     weights = np.concatenate((weights, np.zeros((1, embedding_length))))
     vocab_train = Parser('./data/pos/train', window_size, F2I)

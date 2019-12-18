@@ -16,11 +16,14 @@ class Model(nn.Module):
 		self.hidden = nn.Linear(self.concat_size, hidden_size)
 		self.out = nn.Linear(hidden_size, output_size)
 		self.softmax = nn.Softmax(dim=1)
+		self.dropout = nn.Dropout(0.3)
 
 	def forward(self, x):
-		data = self.embed(x).view(-1, self.concat_size)
+		data = self.embed(x)
+		data = torch.flatten(data, start_dim=1)
 		data = self.hidden(data)
 		data = torch.tanh(data)
+		data = self.dropout(data)
 		data = self.out(data)
 		return self.softmax(data)
 
@@ -34,14 +37,16 @@ def time_for_epoch(start, end):
 
 def get_accuracy(prediction, y, I2L):
 	acc = 0
-	red = 0
+	size = float(len(y))
 	for pred, label in zip(prediction, y):
 		if pred.argmax() == label:
 			if not I2L[int(label)] == 'O':
 				acc += 1
 			else:
-				red += 1
-	return acc / float(len(y) - red)
+				size -= 1
+	if size == 0:
+		return 0
+	return acc / size
 
 
 def train(model, loader, optimizer, loss_func, epoch, I2L):
@@ -76,6 +81,8 @@ def evaluate(model, loader, loss_func, epoch, I2L):
 
 
 def iterate_model(model, train_loader, validation_loader, learning_rate, epochs, I2L):
+	# with open('tagger1_epochs_accuracy.csv', mode= 'w'):
+	# 	filed
 	optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 	loss = nn.CrossEntropyLoss()
 	for epoch in range(epochs):
@@ -98,19 +105,19 @@ def make_loader(parser, batch_size):
 
 
 def tagger_1():
-	batch_size = 100
-	hidden_size = 100
+	batch_size = 30
+	hidden_size = 200
 	embedding_length = 50
 	window_size = 5
 	learning_rate = 0.01
-	epochs = 10
+	epochs = 20
 	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-	vocab_train = Parser(window_size)
+	vocab_train = Parser(window_size, data_name="ner")
 	vocab_train.parse_to_indexed_windows()
 	L2I = vocab_train.get_l2i()
 	F2I = vocab_train.get_f2i()
 	I2L = vocab_train.get_i2l()
-	vocab_valid = Parser(window_size, 'pos', "train", F2I, L2I)
+	vocab_valid = Parser(window_size, 'ner', "dev", F2I, L2I)
 	vocab_valid.parse_to_indexed_windows()
 	output_size = len(L2I)
 	vocab_size = len(F2I)

@@ -2,7 +2,6 @@ from DataUtils import Parser, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
-import numpy as np
 
 
 class Model(nn.Module):

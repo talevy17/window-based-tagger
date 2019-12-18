@@ -26,8 +26,8 @@ class Parser:
         self.is_pos = (data_name == 'pos')
         self.data_kind = data_kind
 
-    def parse_to_indexed_windows(self, convert_digits=True, to_lower=True):
-        self.parse_sentences(convert_digits=True, to_lower=True)
+    def parse_to_indexed_windows(self, to_lower=True):
+        self.parse_sentences(to_lower=to_lower)
         self.create_windows_list_from_sentences()
         self.convert_sentences_windows_to_indexes()
 
@@ -66,7 +66,7 @@ class Parser:
                 else:
                     self.window_labels[index] = l2i[UNKNOWN]
 
-    def parse_sentences(self, convert_digits=True, to_lower=True):
+    def parse_sentences(self, to_lower=True):
         # parse by spaces if post, if ner parse by tab.
         delimiter = ' ' if self.is_pos else '\t'
         current_sentence_words = list()
@@ -79,9 +79,6 @@ class Parser:
                 # convert all chars to lower case.
                 if to_lower:
                     word = word.lower()
-                # if we want to convert each digit to be DG for similarity, '300' = '400'.
-                if convert_digits:
-                    word = re.sub('[0-9]', 'DG', word)
                 label = raw_splitted[1]
                 current_sentence_words.append(word)
                 current_sentence_labels.append(label)

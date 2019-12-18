@@ -23,6 +23,11 @@ class Parser:
 		self.is_pos = (data_name == 'pos')
 		self.data_kind = data_kind
 
+	def parse_sentences_to_window_indexes(self, convert_digits=True, to_lower=True):
+		self.parse_sentences(convert_digits=True, to_lower=True)
+		self.create_windows_list_from_sentences()
+		self.convert_sentences_windows_to_indexes()
+
 	def create_windows_list_from_sentences(self):
 		for sentence in self.sentences_words:
 			if len(sentence) < self.window_size:
@@ -42,7 +47,7 @@ class Parser:
 					curr_sentence_label = sentence_labels[i + self.window_size // 2]
 					self.window_sentences_labels.append(curr_sentence_label)
 
-	def convert_sentences_to_indexes(self):
+	def convert_sentences_windows_to_indexes(self):
 		f2i = self.get_f2i()
 		l2i = self.get_l2i()
 		for sentence in self.window_sentences:
@@ -101,7 +106,8 @@ class Parser:
 
 	def get_l2i(self):
 		if not self.L2I:
-			self.L2I = {l: i for i, l in enumerate(list(sorted(set([w for sublist in self.sentences_labels for w in sublist]))))}
+			self.L2I = {l: i for i, l in
+			            enumerate(list(sorted(set([w for sublist in self.sentences_labels for w in sublist]))))}
 			self.L2I[UNKNOWN] = len(self.L2I)
 		return self.L2I
 
@@ -118,4 +124,4 @@ if __name__ == '__main__':
 	p = Parser(window_size=5, data_name='ner')
 	p.parse_sentences()
 	p.create_windows_list_from_sentences()
-	p.convert_sentences_to_indexes()
+	p.convert_sentences_windows_to_indexes()

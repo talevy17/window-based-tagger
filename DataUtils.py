@@ -1,4 +1,3 @@
-import re
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
@@ -8,49 +7,37 @@ END = "*END*"
 UNKNOWN = '*UNKNOWN*'
 
 
-def get_file_directory(data_name, data_kind):
-    return "./data/{0}/{1}".format(data_name, data_kind)
-
-
 class Parser:
-    def __init__(self, window_size, data_name='pos', data_kind="train", F2I={}, L2I={}):
-        file_dir = get_file_directory(data_name, data_kind)
-        self.file = open(file_dir, 'r')
+    def __init__(self, window_size, data_name='pos', data_kind="train", F2I={}, L2I={}, to_lower=True):
+        with open("./Data/{0}/{1}".format(data_name, data_kind), 'r') as file:
+            data = file.readlines()
         self.windows = []
         self.window_labels = []
-        self.window_size = window_size
-        self.sentences = []
-        self.word_labels = []
-        self.F2I = F2I
-        self.L2I = L2I
-        self.is_pos = (data_name == 'pos')
-        self.data_kind = data_kind
+        sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower)
+        self.F2I = F2I if F2I else self.create_dict(sentences)
+        self.L2I = L2I if L2I else self.create_dict(labels)
+        self.create_windows_list_from_sentences(sentences, labels, window_size, data_kind)
+        self.convert_sentences_windows_to_indexes(data_kind)
 
-    def parse_to_indexed_windows(self, to_lower=True):
-        self.parse_sentences(to_lower=to_lower)
-        self.create_windows_list_from_sentences()
-        self.convert_sentences_windows_to_indexes()
-
-    def create_windows_list_from_sentences(self):
-        for sentence in self.sentences:
-            if len(sentence) < self.window_size:
+    def create_windows_list_from_sentences(self, sentences, labels, window_size, data_kind):
+        for sentence in sentences:
+            if len(sentence) < window_size:
                 raise ValueError("Sentences must be bigger then window size")
-            current_sentence_window = list()
-            # curr_sentence_label = ""
-            last_element = len(sentence) - self.window_size + 1
+            current_sentence_window = []
+            last_element = len(sentence) - window_size + 1
             for i in range(last_element):
-                curr_sentence = [word for word in sentence[i:i + self.window_size]]
+                curr_sentence = [word for word in sentence[i:i + window_size]]
                 current_sentence_window.append(curr_sentence)
             self.windows.extend(current_sentence_window)
 
-        if self.data_kind != "test":
-            for label in self.word_labels:
-                last_element = len(label) - self.window_size + 1
+        if data_kind != "test":
+            for label in labels:
+                last_element = len(label) - window_size + 1
                 for i in range(last_element):
-                    curr_sentence_label = label[i + self.window_size // 2]
+                    curr_sentence_label = label[i + window_size // 2]
                     self.window_labels.append(curr_sentence_label)
 
-    def convert_sentences_windows_to_indexes(self):
+    def convert_sentences_windows_to_indexes(self, data_kind):
         f2i = self.get_f2i()
         l2i = self.get_l2i()
         for sentence in self.windows:
@@ -59,37 +46,40 @@ class Parser:
                     sentence[index] = f2i[word]
                 else:
                     sentence[index] = f2i[UNKNOWN]
-        if self.data_kind != "test":
+        if data_kind != "test":
             for index, label in enumerate(self.window_labels):
                 if label in l2i:
                     self.window_labels[index] = l2i[label]
                 else:
                     self.window_labels[index] = l2i[UNKNOWN]
 
-    def parse_sentences(self, to_lower=True):
+    @staticmethod
+    def parse_sentences(data, is_pos, to_lower):
         # parse by spaces if post, if ner parse by tab.
-        delimiter = ' ' if self.is_pos else '\t'
-        current_sentence_words = list()
-        current_sentence_labels = list()
-        for raw in self.file:
-            raw_splitted = raw.split('\n')
-            raw_splitted = raw_splitted[0].split(delimiter)
-            word = raw_splitted[0]
+        delimiter = ' ' if is_pos else '\t'
+        current_sentence = []
+        current_labels = []
+        sentences = []
+        labels = []
+        for row in data:
+            row_spitted = row.split('\n')
+            row_spitted = row_spitted[0].split(delimiter)
+            word = row_spitted[0]
             if word != '':
                 # convert all chars to lower case.
                 if to_lower:
                     word = word.lower()
-                label = raw_splitted[1]
-                current_sentence_words.append(word)
-                current_sentence_labels.append(label)
+                label = row_spitted[1]
+                current_sentence.append(word)
+                current_labels.append(label)
             else:
-                full_sentence_words = [START, START] + current_sentence_words + [END, END]
-                self.sentences.append(full_sentence_words)
-                full_sentence_labels = [START, START] + current_sentence_labels + [END, END]
-                self.word_labels.append(full_sentence_labels)
-
-                current_sentence_words.clear()
-                current_sentence_labels.clear()
+                full_sentence_words = [START, START] + current_sentence + [END, END]
+                sentences.append(full_sentence_words)
+                full_sentence_labels = [START, START] + current_labels + [END, END]
+                labels.append(full_sentence_labels)
+                current_sentence.clear()
+                current_labels.clear()
+        return sentences, labels
 
     def get_sentences(self):
         return self.windows
@@ -98,26 +88,22 @@ class Parser:
         return self.window_labels
 
     def get_f2i(self):
-        if not self.F2I:
-            self.F2I = {f: i for i, f in
-                        enumerate(list(sorted(set([w for sublist in self.sentences for w in sublist]))))}
-            self.F2I[UNKNOWN] = len(self.F2I)
         return self.F2I
 
     def get_l2i(self):
-        if not self.L2I:
-            self.L2I = {l: i for i, l in
-                        enumerate(list(sorted(set([w for sublist in self.word_labels for w in sublist]))))}
-            self.L2I[UNKNOWN] = len(self.L2I)
         return self.L2I
 
+    @staticmethod
+    def create_dict(data):
+        data_dict = {f: i for i, f in enumerate(list(sorted(set([w for row in data for w in row]))))}
+        data_dict[UNKNOWN] = len(data_dict)
+        return data_dict
+
     def get_i2f(self):
-        i2f = {i: l for l, i in self.F2I.items()}
-        return i2f
+        return {i: l for l, i in self.F2I.items()}
 
     def get_i2l(self):
-        i2l = {i: l for l, i in self.L2I.items()}
-        return i2l
+        return {i: l for l, i in self.L2I.items()}
 
     def data_loader(self, batch_size=1, shuffle=True):
         windows, labels = torch.from_numpy(np.array(self.windows)), torch.from_numpy(np.array(self.window_labels))
@@ -147,6 +133,4 @@ class FromPreTrained:
 
 if __name__ == '__main__':
     p = Parser(window_size=5, data_name='ner')
-    p.parse_sentences()
-    p.create_windows_list_from_sentences()
-    p.convert_sentences_windows_to_indexes()
+

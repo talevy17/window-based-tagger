@@ -19,10 +19,9 @@ def get_k_nearest(k, anchor, weights, word_to_idx):
 
 def top_k():
     embed = FromPreTrained('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
-    words = ['dog', 'england', 'john', 'explode', 'office']
     weights = embed.get_embeddings()
     word_to_idx = embed.get_word_to_idx()
-    for word in words:
+    for word in ['dog', 'england', 'john', 'explode', 'office']:
         print(get_k_nearest(5, word, weights, word_to_idx))
 
 

@@ -30,12 +30,10 @@ def tagger_1():
     learning_rate = 0.01
     epochs = 10
     train_data = Parser(window_size)
-    train_data.parse_to_indexed_windows()
     label_to_idx = train_data.get_l2i()
     word_to_idx = train_data.get_f2i()
     idx_to_label = train_data.get_i2l()
     dev_data = Parser(window_size, 'pos', "train", word_to_idx, label_to_idx)
-    dev_data.parse_to_indexed_windows()
     output_size = len(label_to_idx)
     vocab_size = len(word_to_idx)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)

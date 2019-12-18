@@ -83,14 +83,12 @@ def tagger_3():
     prefix_size = 3
     suffix_size = 3
     train_data = Parser(window_size, data_name='ner')
-    train_data.parse_to_indexed_windows()
     L2I = train_data.get_l2i()
     F2I = train_data.get_f2i()
     I2L = train_data.get_i2l()
     I2F = train_data.get_i2f()
 
     dev_data = Parser(window_size, "ner", "dev", F2I, L2I)
-    dev_data.parse_to_indexed_windows()
     create_pre_suff_dicts(prefix_size, suffix_size, dev_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)

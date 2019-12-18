@@ -1,12 +1,8 @@
 from torch.autograd import Variable
-
-from Parser import Parser
-from top_k import PreTrainedLoader
-from tagger1 import iterate_model, make_loader
+from DataUtils import Parser, PreTrainedLoader, data_loader
+from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
-import numpy as np
-from torch.utils.data import DataLoader, TensorDataset
 
 prefixes = []
 suffixes = []
@@ -19,14 +15,14 @@ class Model(nn.Module):
         super(Model, self).__init__()
         torch.manual_seed(3)
         self.embed = nn.Embedding(vocab_size, embedding_length)
-        self.concat_size = window_size * embedding_length
-        nn.init.uniform_(self.embed.weight, -1.0, 1.0)
         self.embed_prefix = nn.Embedding(prefix_size, embedding_length)
-        nn.init.uniform_(self.embed_prefix.weight, -1.0, 1.0)
         self.embed_suffix = nn.Embedding(suffix_size, embedding_length)
+        nn.init.uniform_(self.embed.weight, -1.0, 1.0)
+        nn.init.uniform_(self.embed_prefix.weight, -1.0, 1.0)
         nn.init.uniform_(self.embed_suffix.weight, -1.0, 1.0)
-        self.hidden = nn.Linear(self.concat_size, hidden_size)
-        self.out = nn.Linear(hidden_size, output_size)
+        self.input_dim = window_size * embedding_length
+        self.non_linear = nn.Sequential(nn.Linear(self.input_dim, hidden_size), nn.Tanh())
+        self.linear = nn.Linear(hidden_size, output_size)
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
@@ -51,12 +47,10 @@ class Model(nn.Module):
         suffix_embed = self.embed_suffix(suffix_vec)
         # sum embedding vectors of word
 
-        data = (prefix_embed + normal_embed + suffix_embed).view(-1, self.concat_size)
-
-        data = self.hidden(data)
-        data = torch.tanh(data)
-        data = self.out(data)
-        return self.softmax(data)
+        x = (prefix_embed + normal_embed + suffix_embed).view(-1, self.input_dim)
+        x = self.non_linear(x)
+        x = self.linear(x)
+        return self.softmax(x)
 
 
 def get_prefix_index_by_word_index(index):
@@ -80,7 +74,7 @@ def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
 
 
 def tagger_3():
-    batch_size = 100
+    batch_size = 1000
     hidden_size = 100
     embedding_length = 50
     window_size = 5
@@ -88,7 +82,6 @@ def tagger_3():
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_train = Parser(window_size, data_name='ner')
     vocab_train.parse_to_indexed_windows()
     L2I = vocab_train.get_l2i()
@@ -105,9 +98,8 @@ def tagger_3():
     suffix_vocab_size = len(SUF2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
                   suffix_vocab_size)
-    model = model
-    model = iterate_model(model, make_loader(vocab_train, batch_size),
-                          make_loader(vocab_valid, batch_size), learning_rate, epochs, I2L)
+    model = trainer_loop(model, data_loader(vocab_train, batch_size),
+                          data_loader(vocab_valid, batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":

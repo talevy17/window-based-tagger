@@ -52,20 +52,20 @@ def get_accuracy(prediction, y, I2L):
 
 
 def train(model, loader, optimizer, loss_func, epoch, I2L):
-	epoch_loss = 0
-	epoch_acc = 0
-	model.train()
-	print(f'Epoch: {epoch + 1:02} | Starting Training...')
-	for x, y in loader:
-		optimizer.zero_grad()
-		prediction = model(x)
-		loss = loss_func(prediction, y)
-		epoch_acc += get_accuracy(prediction, y, I2L)
-		epoch_loss += loss
-		loss.backward()
-		optimizer.step()
-	print(f'Epoch: {epoch + 1:02} | Finished Training')
-	return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader), model
+    epoch_loss = 0
+    epoch_acc = 0
+    model.train()
+    print(f'Epoch: {epoch + 1:02} | Starting Training...')
+    for x, y in loader:
+        optimizer.zero_grad()
+        prediction = model(x)
+        loss = loss_func(prediction, y)
+        epoch_acc += get_accuracy(prediction, y, I2L)
+        epoch_loss += loss
+        loss.backward()
+        optimizer.step()
+    print(f'Epoch: {epoch + 1:02} | Finished Training')
+    return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader), model
 
 
 def evaluate(model, loader, loss_func, epoch, I2L):
@@ -135,4 +135,4 @@ def tagger_1():
 
 
 if __name__ == "__main__":
-	tagger_1()
+    tagger_1()

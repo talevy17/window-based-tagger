@@ -89,7 +89,7 @@ def tagger_3():
     I2F = train_data.get_i2f()
 
     dev_data = DataReader(window_size, "ner", "dev", F2I, L2I)
-    create_pre_suff_dicts(prefix_size, suffix_size, dev_data.get_sentences(), I2F)
+    create_pre_suff_dicts(prefix_size, suffix_size, train_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)
     prefix_vocab_size = len(PRE2I)

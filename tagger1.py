@@ -1,28 +1,10 @@
-import torch
-import torch.nn as nn
+
+from Model import Model
 from ModelTrainer import trainer_loop
 from DataUtils import DataReader
 
 
-class Model(nn.Module):
-    def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size):
-        super(Model, self).__init__()
-        torch.manual_seed(3)
-        self.embed = nn.Embedding(vocab_size, embedding_length)
-        nn.init.uniform_(self.embed.weight, -1.0, 1.0)
-        self.input_dim = window_size * embedding_length
-        self.non_linear = nn.Sequential(nn.Linear(self.input_dim, hidden_size), nn.Tanh())
-        self.linear = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.Softmax(dim=1)
-
-    def forward(self, x):
-        x = self.embed(x).view(-1, self.input_dim)
-        x = self.non_linear(x)
-        x = self.linear(x)
-        return self.softmax(x)
-
-
-def tagger_1():
+if __name__ == "__main__":
     batch_size = 1000
     hidden_size = 100
     embedding_length = 50
@@ -39,7 +21,3 @@ def tagger_1():
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = trainer_loop(model, train_data.data_loader(batch_size),
                          dev_data.data_loader(batch_size), idx_to_label, learning_rate, epochs)
-
-
-if __name__ == "__main__":
-    tagger_1()

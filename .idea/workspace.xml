@@ -2,8 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4a2ed13-06f8-4208-b6b4-e8d79a8b5161" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tagger3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ModelTrainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ModelTrainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tagger1.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tagger2.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tagger3.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger3.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -140,8 +144,8 @@
       <list>
         <item itemvalue="Python.tagger3" />
         <item itemvalue="Python.tagger2" />
-        <item itemvalue="Python.top_k" />
         <item itemvalue="Python.tagger1" />
+        <item itemvalue="Python.top_k" />
       </list>
     </recent_temporary>
   </component>
@@ -158,6 +162,8 @@
       <workItem from="1576227391085" duration="14535000" />
       <workItem from="1576312396407" duration="7247000" />
       <workItem from="1576342851733" duration="27427000" />
+      <workItem from="1576662782650" duration="16609000" />
+      <workItem from="1576744920226" duration="1909000" />
     </task>
     <servers />
   </component>
@@ -177,26 +183,10 @@
       </map>
     </option>
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tagger2.py</url>
-          <line>55</line>
-          <option name="timeStamp" value="22" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/tagger3.py</url>
-          <line>25</line>
-          <option name="timeStamp" value="23" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/window_based_tagger$tagger2.coverage" NAME="tagger2 Coverage Results" MODIFIED="1576412790557" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/window_based_tagger$tagger1.coverage" NAME="tagger1 Coverage Results" MODIFIED="1576402795014" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/window_based_tagger$tagger3.coverage" NAME="tagger3 Coverage Results" MODIFIED="1576424947488" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/window_based_tagger$top_k.coverage" NAME="top_k Coverage Results" MODIFIED="1576405261180" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/window_based_tagger$tagger2.coverage" NAME="tagger2 Coverage Results" MODIFIED="1576745950579" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/window_based_tagger$tagger1.coverage" NAME="tagger1 Coverage Results" MODIFIED="1576745188821" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/window_based_tagger$tagger3.coverage" NAME="tagger3 Coverage Results" MODIFIED="1576746674430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/window_based_tagger$top_k.coverage" NAME="top_k Coverage Results" MODIFIED="1576690764769" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

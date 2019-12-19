@@ -48,8 +48,8 @@ def trainer_loop(model, train_set, dev_set, idx_to_label, lr=0.01, epochs=10):
     loss = nn.CrossEntropyLoss()
     for epoch in range(epochs):
         train_loss, train_acc, model = train(model, train_set, optimizer, loss, idx_to_label)
-        val_loss, val_acc = evaluate(model, dev_set, loss, idx_to_label)
+        dev_loss, dev_acc = evaluate(model, dev_set, loss, idx_to_label)
         print('Epoch: ' + str(epoch + 1))
-        print('Train Loss: ' + str(train_loss) + ', Train Acc: ' + str(train_acc * 100))
-        print('Val. Loss: ' + str(val_loss) + ', Val. Acc: ' + str(val_acc * 100))
+        print(f'\tTrain Loss: {train_loss:.3f}, Train Acc: {train_acc * 100:2f}%')
+        print(f'\tDev Loss: {dev_loss:.3f}, Dev Acc: {dev_acc * 100:2f}%')
     return model

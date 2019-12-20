@@ -14,7 +14,7 @@ hidden_size = 100
 embedding_length = 50
 window_size = 5
 learning_rate = 0.01
-epochs = 2
+epochs = 30
 
 
 class Model(nn.Module):
@@ -136,7 +136,7 @@ def make_loader(parser, batch_size):
 
 
 def tagger_1():
-	data_name = sys.argv[0]
+	data_name = sys.argv[1]
 
 	vocab_train = Parser(window_size, data_name=data_name)
 	vocab_train.parse_to_indexed_windows()

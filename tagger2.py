@@ -7,12 +7,12 @@ import torch.nn as nn
 import numpy as np
 import sys
 
-batch_size = 100
+batch_size = 1000
 hidden_size = 100
 embedding_length = 50
 window_size = 5
 learning_rate = 0.01
-epochs = 10
+epochs = 1
 
 
 class Model(nn.Module):
@@ -33,9 +33,9 @@ class Model(nn.Module):
 
 
 def tagger_2():
-	data_name = sys.argv[0]
+	data_name = sys.argv[1]
 	
-	pretrained = PreTrainedLoader('./data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
+	pretrained = PreTrainedLoader('./data/pretrained/wordVectors.txt', './data/pretrained/vocab.txt')
 	F2I = pretrained.get_dict()
 	weights = pretrained.get_weights()
 	weights = np.concatenate((weights, np.zeros((1, embedding_length))))

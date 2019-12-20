@@ -122,9 +122,9 @@ class DataReader:
 
 class FromPreTrained:
     def __init__(self, vectors, vocab):
-        word_vectors = np.loadtxt("./Data/pretrained/{0}".format(vectors))
+        word_vectors = np.loadtxt("./data/pretrained/{0}".format(vectors))
         self.embeddings = np.concatenate((word_vectors, np.zeros((1, len(word_vectors[0])))))
-        with open("./Data/pretrained/{0}".format(vocab), 'r') as file:
+        with open("./data/pretrained/{0}".format(vocab), 'r') as file:
             self.corpus = {f.split('\n')[0]: i for i, f in enumerate(file)}
         self.corpus[UNKNOWN] = len(self.corpus)
         self.idx_to_word = {i: f for f, i in self.corpus.items()}

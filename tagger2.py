@@ -1,5 +1,5 @@
 from DataUtils import DataReader, FromPreTrained
-from ModelTrainer import trainer_loop
+from ModelTrainer import trainer_loop, predict
 from Model import Model
 import sys
 
@@ -11,6 +11,8 @@ def tagger2(data_type):
     window_size = 5
     learning_rate = 0.01
     epochs = 10
+    msg = 'tagger2_batch_size:' +str(batch_size)+ '_hidden:'+str(hidden_size)+ '_lr:'\
+          +str(learning_rate)+"_"+str(data_type)
     embeddings = FromPreTrained('embeddings.txt', 'words.txt')
     word_to_idx = embeddings.get_word_to_idx()
     weights = embeddings.get_embeddings()
@@ -22,7 +24,9 @@ def tagger2(data_type):
     vocab_size = len(word_to_idx)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, weights)
     model = trainer_loop(model, train_data.data_loader(batch_size),
-                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs, msg)
+    test_parser = DataReader(window_size, data_type=data_type, mode='test', to_lower=True)
+    predict(model, test_parser.data_loader(shuffle=False), data_type, I2L, msg)
 
 
 def arguments_handler():
@@ -40,4 +44,4 @@ def arguments_handler():
 if __name__ == "__main__":
     # you can accept arguments or choose a data type by hand
     # arguments_handler()
-    tagger2('pos')
+    tagger2('ner')

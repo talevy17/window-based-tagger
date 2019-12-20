@@ -1,6 +1,6 @@
 from torch.autograd import Variable
 from DataUtils import DataReader, FromPreTrained
-from ModelTrainer import trainer_loop
+from ModelTrainer import trainer_loop, predict
 import torch
 import torch.nn as nn
 import numpy as np
@@ -95,7 +95,7 @@ def pre_trained_loader(data_type, window_size):
     return train_data, F2I, L2I, I2L, I2F, weights
 
 
-def tagger_3(data_processor, data_type):
+def tagger_3(data_processor, data_type, mission =''):
     batch_size = 1000
     hidden_size = 100
     embedding_length = 50
@@ -104,6 +104,8 @@ def tagger_3(data_processor, data_type):
     epochs = 10
     prefix_size = 3
     suffix_size = 3
+    msg = 'tagger3_batch_size:' +str(batch_size)+ '_hidden:'+str(hidden_size)+ '_lr:'\
+          +str(learning_rate)+"_"+str(data_type)+"_"+ str(mission)
     train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_type=data_type, window_size=window_size)
     dev_data = DataReader(window_size, data_type=data_type, mode="dev", F2I=F2I, L2I=L2I, to_lower=True)
     create_dictionaries(prefix_size, suffix_size, train_data.get_sentences(), I2F)
@@ -114,7 +116,10 @@ def tagger_3(data_processor, data_type):
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
                   suffix_vocab_size, weights)
     model = trainer_loop(model, train_data.data_loader(batch_size),
-                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs,msg)
+    test_parser = DataReader(window_size, data_type=data_type, mode='test', to_lower=True)
+    predict(model, test_parser.data_loader(shuffle=False), data_type, I2L, msg)
+
 
 
 def pre_trained_or_normal(arg):
@@ -162,4 +167,4 @@ def arguments_handler():
 if __name__ == "__main__":
     # Enter values by hand or accept arguments to main
     # arguments_handler()
-    tagger_3(pre_trained_loader, 'pos')
+    tagger_3(normal_loader, 'ner', 'normal')

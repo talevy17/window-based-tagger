@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4a2ed13-06f8-4208-b6b4-e8d79a8b5161" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/window-based-tagger.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/window-based-tagger.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DataUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/DataUtils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model.py" beforeDir="false" afterPath="$PROJECT_DIR$/Model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ModelTrainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/ModelTrainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tagger1.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger1.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tagger2.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tagger3.py" beforeDir="false" afterPath="$PROJECT_DIR$/tagger3.py" afterDir="false" />
@@ -33,9 +39,13 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/data/pretrained" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data/pretrained" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/Data/pretrained" />
       <recent name="$PROJECT_DIR$/Data" />
@@ -54,7 +64,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.tagger2">
+  <component name="RunManager" selected="Python.tagger1">
     <configuration name="tagger1" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="window-based-tagger" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -151,9 +161,9 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.tagger2" />
-        <item itemvalue="Python.tagger3" />
         <item itemvalue="Python.tagger1" />
+        <item itemvalue="Python.tagger3" />
+        <item itemvalue="Python.tagger2" />
         <item itemvalue="Python.top_k" />
       </list>
     </recent_temporary>
@@ -215,6 +225,17 @@
       <screen x="1920" y="0" width="1920" height="1080" />
     </state>
     <state x="2402" y="187" key="SettingsEditor/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1576839582102" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tagger1.py</url>
+          <line>14</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/window_based_tagger$tagger2.coverage" NAME="tagger2 Coverage Results" MODIFIED="1576858732809" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

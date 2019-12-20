@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import csv
 
 
 def calc_batch_accuracy(predictions, labels, idx_to_label):
@@ -13,8 +14,8 @@ def calc_batch_accuracy(predictions, labels, idx_to_label):
     return correct / (correct + wrong)
 
 
-def predict(model, windows, file_type, L2I):
-    with open('./data/test_{0}.txt'.format(file_type), mode='w') as file:
+def predict(model, windows, file_type, L2I,msg):
+    with open('./data/test_{0}.txt'.format(msg), mode='w') as file:
         predictions = list()
         for window in windows:
             y = model(window[0])
@@ -55,13 +56,20 @@ def evaluate(model, dev_set, loss_fn, idx_to_label):
     return float(epoch_loss) / sum_examples, float(epoch_acc) / sum_examples
 
 
-def trainer_loop(model, train_set, dev_set, idx_to_label, lr=0.01, epochs=10):
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    loss = nn.CrossEntropyLoss()
-    for epoch in range(epochs):
-        train_loss, train_acc, model = train(model, train_set, optimizer, loss, idx_to_label)
-        dev_loss, dev_acc = evaluate(model, dev_set, loss, idx_to_label)
-        print('Epoch: ' + str(epoch + 1))
-        print(f'\tTrain Loss: {train_loss:.3f}, Train Acc: {train_acc * 100:2f}%')
-        print(f'\tDev Loss: {dev_loss:.3f}, Dev Acc: {dev_acc * 100:2f}%')
+def trainer_loop(model, train_set, dev_set, idx_to_label, lr=0.01, epochs=10, msg=''):
+    with open('./data/{0}.csv'.format(msg), mode='w') as file:
+        fieldnames = ['Epoch Number', 'Train Loss', 'Train Accuracy', 'Val. Loss', 'Val Accuracy']
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        loss = nn.CrossEntropyLoss()
+        for epoch in range(epochs):
+            train_loss, train_acc, model = train(model, train_set, optimizer, loss, idx_to_label)
+            dev_loss, dev_acc = evaluate(model, dev_set, loss, idx_to_label)
+            print('Epoch: ' + str(epoch + 1))
+            print(f'\tTrain Loss: {train_loss:.3f}, Train Acc: {train_acc * 100:2f}%')
+            print(f'\tDev Loss: {dev_loss:.3f}, Dev Acc: {dev_acc * 100:2f}%')
+            writer.writerow({'Epoch Number': str(epoch + 1), 'Train Loss': str(train_loss),
+                             'Train Accuracy': str(train_acc * 100), 'Val. Loss': str(dev_loss),
+                             'Val Accuracy': str(dev_acc * 100)})
+    file.close()
     return model

@@ -3,6 +3,7 @@ from DataUtils import DataReader, FromPreTrained
 from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
+import numpy as np
 
 prefixes = []
 suffixes = []
@@ -11,11 +12,15 @@ SUF2I = {}
 
 
 class Model(nn.Module):
-    def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_size, suffix_size):
+    def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_size, suffix_size,
+                 weights=np.asarray([]), embedding_freeze=False):
         super(Model, self).__init__()
         torch.manual_seed(3)
-        self.embed = nn.Embedding(vocab_size, embedding_length)
-        nn.init.uniform_(self.embed.weight, -1.0, 1.0)
+        if weights.any():
+            self.embed = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=embedding_freeze)
+        else:
+            self.embed = nn.Embedding(vocab_size, embedding_length)
+            nn.init.uniform_(self.embed.weight, -1.0, 1.0)
         self.embed_prefix = nn.Embedding(prefix_size, embedding_length)
         nn.init.uniform_(self.embed_prefix.weight, -1.0, 1.0)
         self.embed_suffix = nn.Embedding(suffix_size, embedding_length)
@@ -70,10 +75,27 @@ def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
     SUF2I = {suf: i for i, suf in enumerate(sorted(set(suffixes)))}
 
 
-# TODO: change the convert to indexes setnences and call it only outside and not in the parser
+def normal_loader(data_name, window_size):
+    train_data = DataReader(window_size, data_name=data_name)
+    L2I = train_data.get_l2i()
+    F2I = train_data.get_f2i()
+    I2L = train_data.get_i2l()
+    I2F = train_data.get_i2f()
+    return train_data, F2I, L2I, I2L, I2F, np.asarray([])
 
 
-def tagger_3():
+def pre_trained_loader(data_name, window_size):
+    embeddings = FromPreTrained('embeddings.txt', 'words.txt')
+    F2I = embeddings.get_word_to_idx()
+    weights = embeddings.get_embeddings()
+    train_data = DataReader(window_size, data_name=data_name, F2I=F2I)
+    L2I = train_data.get_l2i()
+    I2L = train_data.get_i2l()
+    I2F = train_data.get_i2f()
+    return train_data, F2I, L2I, I2L, I2F, weights
+
+
+def tagger_3(data_processor):
     batch_size = 1000
     hidden_size = 100
     embedding_length = 50
@@ -82,23 +104,18 @@ def tagger_3():
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    train_data = DataReader(window_size, data_name='ner')
-    L2I = train_data.get_l2i()
-    F2I = train_data.get_f2i()
-    I2L = train_data.get_i2l()
-    I2F = train_data.get_i2f()
-
-    dev_data = DataReader(window_size, "ner", "dev", F2I, L2I)
+    train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_name="pos", window_size=window_size)
+    dev_data = DataReader(window_size, data_name="pos", data_kind="dev", F2I=F2I, L2I=L2I)
     create_pre_suff_dicts(prefix_size, suffix_size, train_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)
     prefix_vocab_size = len(PRE2I)
     suffix_vocab_size = len(SUF2I)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
-                  suffix_vocab_size)
+                  suffix_vocab_size, weights)
     model = trainer_loop(model, train_data.data_loader(batch_size),
                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
 if __name__ == "__main__":
-    tagger_3()
+    tagger_3(normal_loader)

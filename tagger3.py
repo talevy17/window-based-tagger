@@ -66,7 +66,7 @@ def get_suffix_index_by_word_index(index):
     return SUF2I[suffixes[index]]
 
 
-def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
+def create_dictionaries(prefix_size, suffix_size, window_sentences, i2f):
     global PRE2I, SUF2I, prefixes, suffixes
     words = [word for sublist in window_sentences for word in sublist]
     prefixes = [i2f[word][: prefix_size] for word in words]
@@ -106,7 +106,7 @@ def tagger_3(data_processor):
     suffix_size = 3
     train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_name="pos", window_size=window_size)
     dev_data = DataReader(window_size, data_name="pos", data_kind="dev", F2I=F2I, L2I=L2I)
-    create_pre_suff_dicts(prefix_size, suffix_size, train_data.get_sentences(), I2F)
+    create_dictionaries(prefix_size, suffix_size, train_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)
     prefix_vocab_size = len(PRE2I)

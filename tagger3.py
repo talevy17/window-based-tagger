@@ -31,7 +31,6 @@ class Model(nn.Module):
         self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
-        # TODO: check if need to change to: prefix_vec, suffix_vec = x.data.numpy().copy(), x.data.numpy().copy()
         prefix_vec, suffix_vec = x.numpy().copy(), x.numpy().copy()
         prefix_vec = prefix_vec.reshape(-1)
         suffix_vec = suffix_vec.reshape(-1)

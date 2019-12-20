@@ -3,15 +3,14 @@ import torch.nn as nn
 
 
 def calc_batch_accuracy(predictions, labels, idx_to_label):
-    correct = 0
-    sum_labels = len(labels)
+    correct = wrong = 0
     for pred, label in zip(predictions, labels):
         if pred.argmax() == label:
             if not idx_to_label[int(label)] == 'O':
                 correct += 1
-            else:
-                sum_labels -= 1
-    return correct / sum_labels if sum_labels > 0 else 0
+        else:
+            wrong += 1
+    return correct / (correct + wrong)
 
 
 def predict(model, windows, file_type, L2I):

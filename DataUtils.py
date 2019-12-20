@@ -53,8 +53,6 @@ class DataReader:
                     self.window_labels[index] = l2i[label]
                 else:
                     self.window_labels[index] = l2i[UNKNOWN]
-        else:
-            self.window_labels.append(1)
 
     @staticmethod
     def parse_sentences(data, is_pos, to_lower, data_kind):
@@ -117,8 +115,9 @@ class DataReader:
 
     def data_loader(self, batch_size=1, shuffle=True):
         windows = self.tensor_conversion(self.windows)
-        labels = self.tensor_conversion(self.window_labels) if not self.data_kind == 'test' else 1
-        return DataLoader(TensorDataset(windows, labels), batch_size, shuffle=shuffle)
+        labels = self.tensor_conversion(self.window_labels)
+        return DataLoader(TensorDataset(windows, labels), batch_size, shuffle=shuffle) if not self.data_kind == "test" \
+            else DataLoader(TensorDataset(windows), batch_size, shuffle=shuffle)
 
 
 class FromPreTrained:

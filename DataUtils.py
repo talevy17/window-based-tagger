@@ -13,13 +13,14 @@ class DataReader:
             data = file.readlines()
         self.windows = []
         self.window_labels = []
+        self.data_kind = data_kind
         sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower, data_kind)
         self.F2I = F2I if F2I else self.create_dict(sentences)
         self.L2I = L2I if L2I else self.create_dict(labels)
-        self.create_windows(sentences, labels, window_size, data_kind)
-        self.convert_to_indexes(data_kind)
+        self.create_windows(sentences, labels, window_size)
+        self.convert_to_indexes()
 
-    def create_windows(self, sentences, labels, window_size, data_kind):
+    def create_windows(self, sentences, labels, window_size):
         for sentence in sentences:
             if len(sentence) < window_size:
                 raise ValueError("Sentences must be bigger then window size")
@@ -30,14 +31,14 @@ class DataReader:
                 current_sentence_window.append(curr_sentence)
             self.windows.extend(current_sentence_window)
 
-        if not data_kind == "test":
+        if not self.data_kind == "test":
             for label in labels:
                 last_element = len(label) - window_size + 1
                 for i in range(last_element):
                     curr_sentence_label = label[i + window_size // 2]
                     self.window_labels.append(curr_sentence_label)
 
-    def convert_to_indexes(self, data_kind):
+    def convert_to_indexes(self):
         f2i = self.get_f2i()
         l2i = self.get_l2i()
         for sentence in self.windows:
@@ -46,7 +47,7 @@ class DataReader:
                     sentence[index] = f2i[word]
                 else:
                     sentence[index] = f2i[UNKNOWN]
-        if not data_kind == "test":
+        if not self.data_kind == "test":
             for index, label in enumerate(self.window_labels):
                 if label in l2i:
                     self.window_labels[index] = l2i[label]
@@ -108,9 +109,15 @@ class DataReader:
     def get_i2l(self):
         return {i: l for l, i in self.L2I.items()}
 
+    @staticmethod
+    def tensor_conversion(data):
+        ret = torch.from_numpy((np.asarray(data)))
+        ret = ret.type(torch.long)
+        return ret
+
     def data_loader(self, batch_size=1, shuffle=True):
-        windows, labels = torch.from_numpy(np.array(self.windows)), torch.from_numpy(np.array(self.window_labels))
-        windows, labels = windows.type(torch.long), labels.type(torch.long)
+        windows = self.tensor_conversion(self.windows)
+        labels = self.tensor_conversion(self.window_labels) if not self.data_kind == 'test' else 1
         return DataLoader(TensorDataset(windows, labels), batch_size, shuffle=shuffle)
 
 

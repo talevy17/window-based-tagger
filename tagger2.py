@@ -5,7 +5,7 @@ from utils import make_test_loader, predict_by_windows
 import torch
 import torch.nn as nn
 import numpy as np
-
+import sys
 
 batch_size = 100
 hidden_size = 100
@@ -33,11 +33,8 @@ class Model(nn.Module):
 
 
 def tagger_2():
-	import argparse
-	parser = argparse.ArgumentParser(description="Tagger 2")
-	parser.add_argument("--data", type=str, help="Kind of Data [pos,ner]")
-	args = parser.parse_args()
-	data_name = args.data
+	data_name = sys.argv[0]
+	
 	pretrained = PreTrainedLoader('./data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
 	F2I = pretrained.get_dict()
 	weights = pretrained.get_weights()

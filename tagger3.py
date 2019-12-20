@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset
-
+import sys
 from utils import predict_by_windows, make_test_loader
 
 prefixes = []
@@ -94,12 +94,10 @@ def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
 
 
 def tagger_3():
-	import argparse
-	parser = argparse.ArgumentParser(description="Tagger 3")
-	parser.add_argument("--data", type=str, help="Kind of Data [pos,ner]")
-	parser.add_argument("--pre_train", action='store_true', help="load pre train vectors or not")
-	args = parser.parse_args()
-	data_name = args.data
+
+	data_name = sys.argv[0]
+
+	pre_train = len(sys.argv) > 1 and sys.argv[1] == "pre_train"
 	vocab_train = Parser(window_size, data_name=data_name)
 	vocab_train.parse_to_indexed_windows()
 	L2I = vocab_train.get_l2i()
@@ -115,7 +113,7 @@ def tagger_3():
 	prefix_vocab_size = len(PRE2I)
 	suffix_vocab_size = len(SUF2I)
 	model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
-	              suffix_vocab_size, pre_train=args.pre_train)
+	              suffix_vocab_size, pre_train=pre_train)
 	iterate_model(model, make_loader(vocab_train, batch_size),
 	              make_loader(vocab_valid, batch_size), I2L)
 

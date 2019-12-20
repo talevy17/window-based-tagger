@@ -6,7 +6,7 @@ import time
 from Parser import Parser
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
-
+import sys
 from utils import predict_by_windows, make_test_loader
 
 batch_size = 1000
@@ -136,11 +136,7 @@ def make_loader(parser, batch_size):
 
 
 def tagger_1():
-	import argparse
-	parser = argparse.ArgumentParser(description="Tagger 1")
-	parser.add_argument("--data", type=str, help="Kind of Data [pos,ner]")
-	args = parser.parse_args()
-	data_name = args.data
+	data_name = sys.argv[0]
 
 	vocab_train = Parser(window_size, data_name=data_name)
 	vocab_train.parse_to_indexed_windows()

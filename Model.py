@@ -1,10 +1,11 @@
+import numpy as np
 import torch
 import torch.nn as nn
 
 
 class Model(nn.Module):
     def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size,
-                 weights=None, embedding_freeze=False):
+                 weights=np.asarray([]), embedding_freeze=False):
         super(Model, self).__init__()
         if weights.any():
             self.embed = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=embedding_freeze)

@@ -9,11 +9,11 @@ UNKNOWN = '*UNKNOWN*'
 
 class DataReader:
     def __init__(self, window_size, data_name='pos', data_kind="train", F2I={}, L2I={}, to_lower=True):
-        with open("./Data/{0}/{1}".format(data_name, data_kind), 'r') as file:
+        with open("./data/{0}/{1}".format(data_name, data_kind), 'r') as file:
             data = file.readlines()
         self.windows = []
         self.window_labels = []
-        sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower)
+        sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower, data_kind)
         self.F2I = F2I if F2I else self.create_dict(sentences)
         self.L2I = L2I if L2I else self.create_dict(labels)
         self.create_windows(sentences, labels, window_size, data_kind)
@@ -54,7 +54,7 @@ class DataReader:
                     self.window_labels[index] = l2i[UNKNOWN]
 
     @staticmethod
-    def parse_sentences(data, is_pos, to_lower):
+    def parse_sentences(data, is_pos, to_lower, data_kind):
         # parse by spaces if post, if ner parse by tab.
         delimiter = ' ' if is_pos else '\t'
         current_sentence = []
@@ -69,9 +69,10 @@ class DataReader:
                 # convert all chars to lower case.
                 if to_lower:
                     word = word.lower()
-                label = row_spitted[1]
+                if not data_kind == 'test':
+                    label = row_spitted[1]
+                    current_labels.append(label)
                 current_sentence.append(word)
-                current_labels.append(label)
             else:
                 full_sentence_words = [START, START] + current_sentence + [END, END]
                 sentences.append(full_sentence_words)

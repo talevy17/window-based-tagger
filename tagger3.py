@@ -95,7 +95,7 @@ def pre_trained_loader(data_type, window_size):
     return train_data, F2I, L2I, I2L, I2F, weights
 
 
-def tagger_3(data_processor):
+def tagger_3(data_processor, data_type):
     batch_size = 1000
     hidden_size = 100
     embedding_length = 50
@@ -104,7 +104,6 @@ def tagger_3(data_processor):
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    data_type = sys.argv[1] if len(sys.argv) > 1 else 'pos'
     train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_type=data_type, window_size=window_size)
     dev_data = DataReader(window_size, data_type=data_type, mode="dev", F2I=F2I, L2I=L2I, to_lower=True)
     create_dictionaries(prefix_size, suffix_size, train_data.get_sentences(), I2F)
@@ -118,5 +117,49 @@ def tagger_3(data_processor):
                          dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
 
 
+def pre_trained_or_normal(arg):
+    if arg == 'normal':
+        return normal_loader
+    elif arg == 'pre_trained':
+        return pre_trained_loader
+    return None
+
+
+def is_data_type(arg):
+    return arg == 'ner' or arg == 'pos'
+
+
+def arguments_handler():
+    args = sys.argv
+    data_type = 'pos'
+    data_processor = normal_loader
+    if len(args) == 2:
+        _data_processor = pre_trained_or_normal(args[1])
+        if _data_processor:
+            data_processor = _data_processor
+        else:
+            data_type = args[1]
+    elif len(args) == 3:
+        if is_data_type(args[1]):
+            data_type = args[1]
+            data_processor = pre_trained_or_normal(args[2])
+        else:
+            data_type = args[2]
+            data_processor = pre_trained_or_normal(args[1])
+    if is_data_type(data_type) and data_processor:
+        tagger_3(data_processor, data_type)
+    else:
+        print("Invalid data type or function call;\n"
+              "\tValid data types:\n"
+              "\t\t1. ner\n"
+              "\t\t2. pos\n"
+              "\tValid function calls:\n"
+              "\t\t1. normal\n"
+              "\t\t2. pre_trained\n"
+              "Order doesn't matter, default values are normal and pos")
+
+
 if __name__ == "__main__":
-    tagger_3(normal_loader)
+    # Enter values by hand or accept arguments to main
+    # arguments_handler()
+    tagger_3(pre_trained_loader, 'pos')

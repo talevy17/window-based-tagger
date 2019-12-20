@@ -8,13 +8,13 @@ UNKNOWN = '*UNKNOWN*'
 
 
 class DataReader:
-    def __init__(self, window_size, data_name='pos', data_kind="train", F2I={}, L2I={}, to_lower=True):
-        with open("./data/{0}/{1}".format(data_name, data_kind), 'r') as file:
+    def __init__(self, window_size, data_type='pos', mode="train", F2I={}, L2I={}, to_lower=True):
+        with open("./data/{0}/{1}".format(data_type, mode), 'r') as file:
             data = file.readlines()
         self.windows = []
         self.window_labels = []
-        self.data_kind = data_kind
-        sentences, labels = self.parse_sentences(data, data_name == 'pos', to_lower, data_kind)
+        self.mode = mode
+        sentences, labels = self.parse_sentences(data, data_type == 'pos', to_lower, mode)
         self.F2I = F2I if F2I else self.create_dict(sentences)
         self.L2I = L2I if L2I else self.create_dict(labels)
         self.create_windows(sentences, labels, window_size)
@@ -31,7 +31,7 @@ class DataReader:
                 current_sentence_window.append(curr_sentence)
             self.windows.extend(current_sentence_window)
 
-        if not self.data_kind == "test":
+        if not self.mode == "test":
             for label in labels:
                 last_element = len(label) - window_size + 1
                 for i in range(last_element):
@@ -47,7 +47,7 @@ class DataReader:
                     sentence[index] = f2i[word]
                 else:
                     sentence[index] = f2i[UNKNOWN]
-        if not self.data_kind == "test":
+        if not self.mode == "test":
             for index, label in enumerate(self.window_labels):
                 if label in l2i:
                     self.window_labels[index] = l2i[label]
@@ -55,7 +55,7 @@ class DataReader:
                     self.window_labels[index] = l2i[UNKNOWN]
 
     @staticmethod
-    def parse_sentences(data, is_pos, to_lower, data_kind):
+    def parse_sentences(data, is_pos, to_lower, mode):
         # parse by spaces if post, if ner parse by tab.
         delimiter = ' ' if is_pos else '\t'
         current_sentence = []
@@ -70,7 +70,7 @@ class DataReader:
                 # convert all chars to lower case.
                 if to_lower:
                     word = word.lower()
-                if not data_kind == 'test':
+                if not mode == 'test':
                     label = row_spitted[1]
                     current_labels.append(label)
                 current_sentence.append(word)
@@ -116,7 +116,7 @@ class DataReader:
     def data_loader(self, batch_size=1, shuffle=True):
         windows = self.tensor_conversion(self.windows)
         labels = self.tensor_conversion(self.window_labels)
-        return DataLoader(TensorDataset(windows, labels), batch_size, shuffle=shuffle) if not self.data_kind == "test" \
+        return DataLoader(TensorDataset(windows, labels), batch_size, shuffle=shuffle) if not self.mode == "test" \
             else DataLoader(TensorDataset(windows), batch_size, shuffle=shuffle)
 
 

@@ -4,6 +4,7 @@ from ModelTrainer import trainer_loop
 import torch
 import torch.nn as nn
 import numpy as np
+import sys
 
 prefixes = []
 suffixes = []
@@ -74,8 +75,8 @@ def create_dictionaries(prefix_size, suffix_size, window_sentences, i2f):
     SUF2I = {suf: i for i, suf in enumerate(sorted(set(suffixes)))}
 
 
-def normal_loader(data_name, window_size):
-    train_data = DataReader(window_size, data_name=data_name)
+def normal_loader(data_type, window_size):
+    train_data = DataReader(window_size, data_type=data_type, to_lower=True)
     L2I = train_data.get_l2i()
     F2I = train_data.get_f2i()
     I2L = train_data.get_i2l()
@@ -83,11 +84,11 @@ def normal_loader(data_name, window_size):
     return train_data, F2I, L2I, I2L, I2F, np.asarray([])
 
 
-def pre_trained_loader(data_name, window_size):
+def pre_trained_loader(data_type, window_size):
     embeddings = FromPreTrained('embeddings.txt', 'words.txt')
     F2I = embeddings.get_word_to_idx()
     weights = embeddings.get_embeddings()
-    train_data = DataReader(window_size, data_name=data_name, F2I=F2I)
+    train_data = DataReader(window_size, data_type=data_type, F2I=F2I, to_lower=True)
     L2I = train_data.get_l2i()
     I2L = train_data.get_i2l()
     I2F = train_data.get_i2f()
@@ -103,8 +104,9 @@ def tagger_3(data_processor):
     epochs = 10
     prefix_size = 3
     suffix_size = 3
-    train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_name="pos", window_size=window_size)
-    dev_data = DataReader(window_size, data_name="pos", data_kind="dev", F2I=F2I, L2I=L2I)
+    data_type = sys.argv[1] if len(sys.argv) > 1 else 'pos'
+    train_data, F2I, L2I, I2L, I2F, weights = data_processor(data_type=data_type, window_size=window_size)
+    dev_data = DataReader(window_size, data_type=data_type, mode="dev", F2I=F2I, L2I=L2I, to_lower=True)
     create_dictionaries(prefix_size, suffix_size, train_data.get_sentences(), I2F)
     output_size = len(L2I)
     vocab_size = len(F2I)

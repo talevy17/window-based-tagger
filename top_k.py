@@ -6,13 +6,10 @@ from Parser import UNKNOWN
 
 
 class PreTrainedLoader:
-    def __init__(self, vectors, vocab, convert_digits=True):
+    def __init__(self, vectors, vocab):
         self.vectors = np.loadtxt(vectors)
         file = open(vocab, 'r')
-        if convert_digits:
-            self.vocab = {re.sub('[0-9]', 'DG', f.split('\n')[0]): i for i, f in enumerate(file)}
-        else:
-            self.vocab = {f.split('\n')[0]: i for i, f in enumerate(file)}
+        self.vocab = {f.split('\n')[0]: i for i, f in enumerate(file)}
         file.close()
         self.vocab[UNKNOWN] = len(self.vocab)
         self.i2f = {i: f for f, i in self.vocab.items()}

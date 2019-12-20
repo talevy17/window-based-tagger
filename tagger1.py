@@ -9,13 +9,6 @@ import numpy as np
 import sys
 from utils import predict_by_windows, make_test_loader
 
-batch_size = 1000
-hidden_size = 100
-embedding_length = 50
-window_size = 5
-learning_rate = 0.01
-epochs = 30
-
 
 class Model(nn.Module):
 	def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size):
@@ -104,11 +97,11 @@ def evaluate(model, loader, loss_func, epoch, I2L):
 	return float(epoch_loss) / len(loader), float(epoch_acc) / len(loader)
 
 
-def iterate_model(model, train_loader, validation_loader, I2L):
-	with open('./data/tagger1_epochs{0}_batchsize{1}_h{2}_ner.csv'.format(epochs, batch_size, hidden_size),
-	          mode='w') as file:
-		fieldnames = ['Epoch Number', 'Train Loss', 'Train Accuracy', 'Val. Loss', 'Val Accuracy']
-		writer = csv.DictWriter(file, fieldnames=fieldnames)
+def iterate_model(model, train_loader, validation_loader, I2L, epochs, batch_size, hidden_size, learning_rate):
+	# with open('./data/tagger1_epochs{0}_batchsize{1}_h{2}_ner.csv'.format(epochs, batch_size, hidden_size),
+	#           mode='w') as file:
+	# 	fieldnames = ['Epoch Number', 'Train Loss', 'Train Accuracy', 'Val. Loss', 'Val Accuracy']
+	# 	writer = csv.DictWriter(file, fieldnames=fieldnames)
 		optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 		loss = nn.CrossEntropyLoss()
 		for epoch in range(epochs):
@@ -120,11 +113,11 @@ def iterate_model(model, train_loader, validation_loader, I2L):
 			print(f'Epoch: {epoch + 1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
 			print(f'\tTrain Loss: {train_loss:.3f} | Train Acc: {train_acc * 100:.2f}%')
 			print(f'\t Val. Loss: {val_loss:.3f} |  Val. Acc: {val_acc * 100:.2f}%')
-			writer.writerow({'Epoch Number': str(epoch + 1), 'Train Loss': str(train_loss),
-			                 'Train Accuracy': str(train_acc * 100), 'Val. Loss': str(val_loss),
-			                 'Val Accuracy': str(val_acc * 100)})
-	file.close()
-	return model
+			# writer.writerow({'Epoch Number': str(epoch + 1), 'Train Loss': str(train_loss),
+			#                  'Train Accuracy': str(train_acc * 100), 'Val. Loss': str(val_loss),
+			#                  'Val Accuracy': str(val_acc * 100)})
+	# file.close()
+		return model
 
 
 def make_loader(parser, batch_size):
@@ -134,10 +127,14 @@ def make_loader(parser, batch_size):
 	return DataLoader(TensorDataset(x, y), batch_size, shuffle=True)
 
 
-
 def tagger_1():
 	data_name = sys.argv[1]
-
+	batch_size = 1000
+	hidden_size = 100
+	embedding_length = 50
+	window_size = 5
+	learning_rate = 0.01
+	epochs = 30
 	vocab_train = Parser(window_size, data_name=data_name)
 	vocab_train.parse_to_indexed_windows()
 	L2I = vocab_train.get_l2i()
@@ -150,7 +147,7 @@ def tagger_1():
 	model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
 	model = model
 	model = iterate_model(model, make_loader(vocab_train, batch_size),
-	                      make_loader(vocab_valid, batch_size), I2L)
+	                      make_loader(vocab_valid, batch_size), I2L, epochs, batch_size, hidden_size, learning_rate)
 	test_parser = Parser(window_size, data_name, 'test')
 	test_parser.parse_to_indexed_windows()
 	predict_by_windows(model, make_test_loader(test_parser), data_name, I2L)

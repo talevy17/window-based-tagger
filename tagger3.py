@@ -95,7 +95,7 @@ def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
 
 def tagger_3():
 
-	data_name = sys.argv[0]
+	data_name = sys.argv[1]
 
 	pre_train = len(sys.argv) > 1 and sys.argv[1] == "pre_train"
 	vocab_train = Parser(window_size, data_name=data_name)
@@ -114,8 +114,8 @@ def tagger_3():
 	suffix_vocab_size = len(SUF2I)
 	model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
 	              suffix_vocab_size, pre_train=pre_train)
-	iterate_model(model, make_loader(vocab_train, batch_size),
-	              make_loader(vocab_valid, batch_size), I2L)
+	model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size),
+				I2L, epochs, batch_size, hidden_size, learning_rate)
 
 	test_parser = Parser(window_size, data_name, 'test')
 	test_parser.parse_to_indexed_windows()

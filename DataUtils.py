@@ -53,7 +53,7 @@ class DataReader:
                 else:
                     self.window_labels[index] = l2i[UNKNOWN]
         else:
-            self.window_labels[0] = 1
+            self.window_labels.append(1)
 
     @staticmethod
     def parse_sentences(data, is_pos, to_lower, data_kind):

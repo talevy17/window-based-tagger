@@ -14,6 +14,19 @@ def calc_batch_accuracy(predictions, labels, idx_to_label):
     return correct / sum_labels if sum_labels > 0 else 0
 
 
+def predict(model, windows, file_type, L2I):
+    with open('./data/test_{0}.txt'.format(file_type), mode='w') as file:
+        predictions = list()
+        for window in windows:
+            y = model(window[0])
+            _, y = torch.max(y, 1)
+            y = L2I[int(y)]
+            predictions.append(y)
+            file.write("{0}\n".format(y))
+    file.close()
+    return predictions
+
+
 def train(model, train_set, optimizer, loss_fn, idx_to_label):
     epoch_loss = 0
     epoch_acc = 0

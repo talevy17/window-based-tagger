@@ -30,7 +30,7 @@ class DataReader:
                 current_sentence_window.append(curr_sentence)
             self.windows.extend(current_sentence_window)
 
-        if data_kind != "test":
+        if not data_kind == "test":
             for label in labels:
                 last_element = len(label) - window_size + 1
                 for i in range(last_element):
@@ -46,12 +46,14 @@ class DataReader:
                     sentence[index] = f2i[word]
                 else:
                     sentence[index] = f2i[UNKNOWN]
-        if data_kind != "test":
+        if not data_kind == "test":
             for index, label in enumerate(self.window_labels):
                 if label in l2i:
                     self.window_labels[index] = l2i[label]
                 else:
                     self.window_labels[index] = l2i[UNKNOWN]
+        else:
+            self.window_labels[0] = 1
 
     @staticmethod
     def parse_sentences(data, is_pos, to_lower, data_kind):

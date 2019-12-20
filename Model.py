@@ -23,3 +23,13 @@ class Model(nn.Module):
         x = self.non_linear(x)
         x = self.linear(x)
         return self.softmax(x)
+
+    def save(self, name):
+        path = './Data/models/{0}'.format(name)
+        torch.save(self, path)
+
+    @staticmethod
+    def load(name):
+        path = './Data/models/{0}'.format(name)
+        return torch.load(path)
+

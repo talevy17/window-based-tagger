@@ -6,6 +6,9 @@ import torch.nn as nn
 import numpy as np
 import sys
 
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
+
 prefixes = []
 suffixes = []
 PRE2I = {}

@@ -2,6 +2,8 @@
 import numpy as np
 from DataUtils import FromPreTrained, UNKNOWN
 
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
 
 def cosine_distance(a, b):
     return np.divide(np.dot(a, b), (np.linalg.norm(a) * np.linalg.norm(b)))

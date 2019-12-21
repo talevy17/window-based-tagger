@@ -2,6 +2,9 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
+
 START = "*START*"
 END = "*END*"
 UNKNOWN = '*UNKNOWN*'

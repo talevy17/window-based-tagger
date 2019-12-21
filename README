@@ -1,28 +1,31 @@
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
+
 General information:
 	All of the following parts are dependent on having a directory 
-	called "Data" in it's root which containes the "ner" and "pos" directories
+	called "Data" in it's root which contains the "ner" and "pos" directories
 	of the given dataset in the assignment and a directory called 
 	"pretrained" that contained two files: "embeddings.txt" and "words.txt"
 	which include the word embeddings and the vocabulary respectively. 
 
 Part 1:
-	To run simply type pyhton3 tagger1.py in the console,
+	To run simply type python3 tagger1.py in the console,
 	It's default is to run on the "pos" dataset, but you can specify
 	on which dataset to run by giving pos or ner as a parameter.
-	E.g: pyhton3 tagger1.py ner
+	E.g: python3 tagger1.py ner
 
 	Dependencies: tagger1.py, Model.py, ModelTrainer.py and DataUtils.py
 
 Part 2:
 	To run simply type python3 top_k.py in the console.
 
-	Dependecies: top_k.py, DataUtils.py
+	Dependencies: top_k.py, DataUtils.py
 
 Part 3:
 	To run follow the instructions for Part 1, only instead of tagger1
 	call tagger2.
 
-	Dependecies: tagger2.py, Model.py, ModelTrainer.py and DataUtils.py
+	Dependencies: tagger2.py, Model.py, ModelTrainer.py and DataUtils.py
 
 Part 4:
 	to run type python3 tagger3.py in the console.
@@ -30,8 +33,8 @@ Part 4:
 	the pre trained word embeddings.
 	in order to change these settings you can pass "pos" or "ner"
 	for the dataset and\or "normal" or "pre_trained" for choosing 
-	between the pre_trained embeddings or the "normal" (initilalized 
-	uniformily) embeddings.
+	between the pre_trained embeddings or the "normal" (initialized
+	uniformly) embeddings.
 	The order of the parameters does not matter.
 	E.g: python3 tagger3.py pre_trained pos
 	     python3 tagger3.py ner normal

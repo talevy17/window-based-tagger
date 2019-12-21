@@ -3,6 +3,9 @@ from ModelTrainer import trainer_loop, predict
 from Model import Model
 import sys
 
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
+
 
 def tagger2(data_type):
     batch_size = 700

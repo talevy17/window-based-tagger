@@ -2,6 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+STUDENT = {'name': 'Tal Levy, Lidor Alis',
+           'ID': '---, ---'}
+
 
 class Model(nn.Module):
     def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size,

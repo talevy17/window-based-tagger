@@ -14,7 +14,7 @@ def get_k_nearest(k, anchor, weights, word_to_idx):
         if not (word == anchor or word == UNKNOWN):
             results.append((cosine_distance(embedded_anchor, weight), word))
     results.sort(key=lambda item: item[0], reverse=True)
-    return [item[1] for item in results[:k]]
+    return [(item[1], f'{item[0]:.4f}') for item in results[:k]]
 
 
 def top_k():

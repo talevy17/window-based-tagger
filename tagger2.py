@@ -44,4 +44,4 @@ def arguments_handler():
 if __name__ == "__main__":
     # you can accept arguments or choose a data type by hand
     # arguments_handler()
-    tagger2('ner')
+    tagger2('pos')

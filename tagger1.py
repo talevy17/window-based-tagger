@@ -12,8 +12,6 @@ def tagger1(data_type):
     window_size = 5
     learning_rate = 0.01
     epochs = 15
-    msg = 'tagger1_batch_size:' +str(batch_size)+ '_hidden:'+str(hidden_size)+ '_lr:'\
-          +str(learning_rate)+"_"+str(data_type)
     train_data = DataReader(window_size, data_type=data_type, to_lower=True)
     L2I = train_data.get_l2i()
     F2I = train_data.get_f2i()
@@ -23,9 +21,9 @@ def tagger1(data_type):
     dev_data = DataReader(window_size, data_type=data_type, mode="dev", F2I=F2I, L2I=L2I, to_lower=True)
     model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size)
     model = trainer_loop(model, train_data.data_loader(batch_size),
-                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs,msg)
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
     test_parser = DataReader(window_size, data_type=data_type, mode='test', to_lower=True)
-    predict(model, test_parser.data_loader(shuffle=False), data_type, I2L,msg)
+    predict(model, test_parser.data_loader(shuffle=False), data_type, I2L)
 
 
 def arguments_handler():
@@ -42,6 +40,6 @@ def arguments_handler():
 
 if __name__ == "__main__":
     # you can accept arguments or choose a data type by hand
-    # arguments_handler()
-    #tagger1('ner')
-    tagger1('pos')
+    arguments_handler()
+    # tagger1('ner')
+    # tagger1('pos')

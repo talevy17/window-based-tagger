@@ -42,20 +42,18 @@ class DataReader:
                     self.window_labels.append(curr_sentence_label)
 
     def convert_to_indexes(self):
-        f2i = self.get_f2i()
-        l2i = self.get_l2i()
         for sentence in self.windows:
             for index, word in enumerate(sentence):
-                if word in f2i:
-                    sentence[index] = f2i[word]
+                if word in self.F2I:
+                    sentence[index] = self.F2I[word]
                 else:
-                    sentence[index] = f2i[UNKNOWN]
+                    sentence[index] = self.F2I[UNKNOWN]
         if not self.mode == "test":
             for index, label in enumerate(self.window_labels):
-                if label in l2i:
-                    self.window_labels[index] = l2i[label]
+                if label in self.L2I:
+                    self.window_labels[index] = self.L2I[label]
                 else:
-                    self.window_labels[index] = l2i[UNKNOWN]
+                    self.window_labels[index] = self.L2I[UNKNOWN]
 
     @staticmethod
     def parse_sentences(data, is_pos, to_lower, mode):

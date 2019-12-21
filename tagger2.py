@@ -5,8 +5,8 @@ import sys
 
 
 def tagger2(data_type):
-    batch_size = 1000
-    hidden_size = 100
+    batch_size = 700
+    hidden_size = 128
     embedding_length = 50
     window_size = 5
     learning_rate = 0.01

@@ -26,19 +26,15 @@ suffix_size = 3
 
 class Model(nn.Module):
 	def __init__(self, output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_size, suffix_size,
-	             pre_train=False):
+	             weights):
 		super(Model, self).__init__()
 		torch.manual_seed(3)
-		if pre_train:
-			pre_trained = PreTrainedLoader('./data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
-			weights = pre_trained.get_weights()
-			weights = np.concatenate((weights, np.zeros((1, embedding_length))))
+		if weights.any():
 			self.embed = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=False)
 		else:
 			self.embed = nn.Embedding(vocab_size, embedding_length)
-		self.embed = nn.Embedding(vocab_size, embedding_length)
+			nn.init.uniform_(self.embed.weight, -1.0, 1.0)
 		self.concat_size = window_size * embedding_length
-		nn.init.uniform_(self.embed.weight, -1.0, 1.0)
 		self.embed_prefix = nn.Embedding(prefix_size, embedding_length)
 		nn.init.uniform_(self.embed_prefix.weight, -1.0, 1.0)
 		self.embed_suffix = nn.Embedding(suffix_size, embedding_length)
@@ -93,15 +89,30 @@ def create_pre_suff_dicts(prefix_size, suffix_size, window_sentences, i2f):
 	SUF2I = {suf: i for i, suf in enumerate(sorted(set(suffixes)))}
 
 
+def pre_train_loader(data_name):
+	pretrained = PreTrainedLoader('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
+	F2I = pretrained.get_dict()
+	weights = pretrained.get_weights()
+	weights = np.concatenate((weights, np.zeros((1, embedding_length))))
+	vocab_train = Parser(window_size, data_kind="train", data_name=data_name, F2I=F2I)
+	vocab_train.parse_to_indexed_windows(to_lower=True)
+	return vocab_train, weights, F2I
+
+
+def loader(data_name):
+	vocab_train = Parser(window_size, data_name=data_name)
+	vocab_train.parse_to_indexed_windows()
+	F2I = vocab_train.get_f2i()
+	weights = np.asarray([])
+	return vocab_train, weights, F2I
+
+
 def tagger_3():
 
 	data_name = sys.argv[1]
-
-	pre_train = len(sys.argv) > 1 and sys.argv[1] == "pre_train"
-	vocab_train = Parser(window_size, data_name=data_name)
-	vocab_train.parse_to_indexed_windows()
+	pre_train = len(sys.argv) > 2 and sys.argv[2] == "pre_train"
+	vocab_train, weights, F2I = pre_train_loader(data_name) if pre_train else loader(data_name)
 	L2I = vocab_train.get_l2i()
-	F2I = vocab_train.get_f2i()
 	I2L = vocab_train.get_i2l()
 	I2F = vocab_train.get_i2f()
 
@@ -113,7 +124,7 @@ def tagger_3():
 	prefix_vocab_size = len(PRE2I)
 	suffix_vocab_size = len(SUF2I)
 	model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, prefix_vocab_size,
-	              suffix_vocab_size, pre_train=pre_train)
+	              suffix_vocab_size, weights)
 	model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size),
 				I2L, epochs, batch_size, hidden_size, learning_rate)
 

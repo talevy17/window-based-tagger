@@ -98,7 +98,7 @@ def pre_trained_loader(data_type, window_size):
     return train_data, F2I, L2I, I2L, I2F, weights
 
 
-def tagger_3(data_processor, data_type, mission =''):
+def tagger_3(data_processor, data_type):
     batch_size = 1000
     hidden_size = 100
     embedding_length = 50

@@ -8,7 +8,7 @@ STUDENT = {'name': 'Tal Levy, Lidor Alis',
            'ID': '---, ---'}
 
 
-def tagger1(data_type):
+def tagger_1(data_type):
     batch_size = 1028
     hidden_size = 128
     embedding_length = 50
@@ -32,7 +32,7 @@ def tagger1(data_type):
 def arguments_handler():
     data_type = sys.argv[1] if len(sys.argv) > 1 else 'pos'
     if data_type == 'ner' or data_type == 'pos':
-        tagger1(data_type)
+        tagger_1(data_type)
     else:
         print("Invalid data type;\n"
               "\tValid data types are:\n"

@@ -4,9 +4,6 @@ from ModelTrainer import trainer_loop, predict
 from DataUtils import DataReader
 import sys
 
-STUDENT = {'name': 'Tal Levy, Lidor Alis',
-           'ID': '---, ---'}
-
 
 def tagger_1(data_type):
     batch_size = 1028

@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 import csv
 
-STUDENT = {'name': 'Tal Levy, Lidor Alis',
-           'ID': '---, ---'}
-
 
 def calc_batch_accuracy(predictions, labels, idx_to_label):
     correct = wrong = 0

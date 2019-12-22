@@ -131,6 +131,6 @@ dmypy.json
 .pyre/
 
 # Custom
-Data/
+data/
 
 data/

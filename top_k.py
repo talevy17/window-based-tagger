@@ -1,48 +1,29 @@
+
 import numpy as np
-from numpy import dot
-from numpy.linalg import norm
-import re
-from Parser import UNKNOWN
+from DataUtils import FromPreTrained, UNKNOWN
 
 
-class PreTrainedLoader:
-    def __init__(self, vectors, vocab):
-        self.vectors = np.loadtxt(vectors)
-        file = open(vocab, 'r')
-        self.vocab = {f.split('\n')[0]: i for i, f in enumerate(file)}
-        file.close()
-        self.vocab[UNKNOWN] = len(self.vocab)
-        self.i2f = {i: f for f, i in self.vocab.items()}
-
-    def get_weights(self):
-        return self.vectors
-
-    def get_dict(self):
-        return self.vocab
-
-    def get_i2f(self):
-        return self.i2f
+def cosine_distance(a, b):
+    return np.divide(np.dot(a, b), (np.linalg.norm(a) * np.linalg.norm(b)))
 
 
-def sim(vector_a, vector_b):
-    return dot(vector_a, vector_b) / (norm(vector_a) * norm(vector_b))
-
-
-def top(k, key, weights, f2i):
+def get_k_nearest(k, anchor, weights, word_to_idx):
     results = []
-    word_vector = weights[f2i[key]]
-    for word, vector in zip(f2i.keys(), weights):
-        if not word == key:
-            results.append((sim(word_vector, vector), word))
-    results.sort(key=lambda x: x[0], reverse=True)
-    return [element[1] for element in results[:k]]
+    embedded_anchor = weights[word_to_idx[anchor]]
+    for word, weight in zip(word_to_idx.keys(), weights):
+        if not (word == anchor or word == UNKNOWN):
+            results.append((cosine_distance(embedded_anchor, weight), word))
+    results.sort(key=lambda item: item[0], reverse=True)
+    return [(item[1], f'{item[0]:.4f}') for item in results[:k]]
+
+
+def top_k():
+    embed = FromPreTrained('embeddings.txt', 'words.txt')
+    weights = embed.get_embeddings()
+    word_to_idx = embed.get_word_to_idx()
+    for word in ['dog', 'england', 'john', 'explode', 'office']:
+        print(get_k_nearest(5, word, weights, word_to_idx))
 
 
 if __name__ == "__main__":
-    loader = PreTrainedLoader('./Data/pretrained/wordVectors.txt', './Data/pretrained/vocab.txt')
-    words = ['dog', 'england', 'john', 'explode', 'office']
-    weights = loader.get_weights()
-    f2i = loader.get_dict()
-    i2f = loader.get_i2f()
-    for word in words:
-        print(top(5, word, weights, f2i))
+    top_k()

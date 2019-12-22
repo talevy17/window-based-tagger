@@ -1,57 +1,46 @@
-from Parser import Parser, UNKNOWN
-from top_k import PreTrainedLoader
-from tagger1 import make_loader, iterate_model
-from utils import make_test_loader, predict_by_windows
-import torch
-import torch.nn as nn
-import numpy as np
+
+from DataUtils import DataReader, FromPreTrained
+from ModelTrainer import trainer_loop, predict
+from Model import Model
 import sys
 
 
-class Model(nn.Module):
-	def __init__(self, output_size, hidden_size, embedding_length, window_size, weights):
-		super(Model, self).__init__()
-		self.embed = nn.Embedding.from_pretrained(torch.FloatTensor(weights), freeze=False)
-		self.concat_size = window_size * embedding_length
-		self.hidden = nn.Linear(self.concat_size, hidden_size)
-		self.out = nn.Linear(hidden_size, output_size)
-		self.softmax = nn.Softmax(dim=1)
+def tagger_2(data_type):
+    batch_size = 700
+    hidden_size = 128
+    embedding_length = 50
+    window_size = 5
+    learning_rate = 0.01
+    epochs = 10
+    embeddings = FromPreTrained('embeddings.txt', 'words.txt')
+    word_to_idx = embeddings.get_word_to_idx()
+    weights = embeddings.get_embeddings()
+    train_data = DataReader(window_size, data_type=data_type, F2I=word_to_idx, to_lower=True)
+    L2I = train_data.get_l2i()
+    I2L = train_data.get_i2l()
+    dev_data = DataReader(window_size, data_type=data_type, mode="dev", F2I=word_to_idx, L2I=L2I, to_lower=True)
+    output_size = len(L2I)
+    vocab_size = len(word_to_idx)
+    model = Model(output_size, hidden_size, vocab_size, embedding_length, window_size, weights)
+    model = trainer_loop(model, train_data.data_loader(batch_size),
+                         dev_data.data_loader(batch_size), I2L, learning_rate, epochs)
+    # test_parser = DataReader(window_size, data_type=data_type, mode='test', to_lower=True)
+    # predict(model, test_parser.data_loader(shuffle=False), data_type, I2L)
 
-	def forward(self, x):
-		data = self.embed(x).view(-1, self.concat_size)
-		data = self.hidden(data)
-		data = torch.tanh(data)
-		data = self.out(data)
-		return self.softmax(data)
 
-
-def tagger_2():
-	data_name = sys.argv[1]
-	batch_size = 1000
-	hidden_size = 100
-	embedding_length = 50
-	window_size = 5
-	learning_rate = 0.01
-	epochs = 10
-	pretrained = PreTrainedLoader('./Data/pretrained/embeddings.txt', './Data/pretrained/words.txt')
-	F2I = pretrained.get_dict()
-	weights = pretrained.get_weights()
-	weights = np.concatenate((weights, np.zeros((1, embedding_length))))
-	vocab_train = Parser(window_size, data_kind="train", data_name="ner", F2I=F2I)
-	vocab_train.parse_to_indexed_windows(to_lower=True)
-	L2I = vocab_train.get_l2i()
-	I2L = vocab_train.get_i2l()
-	vocab_valid = Parser(window_size, data_name="ner", data_kind="dev", F2I=F2I, L2I=L2I)
-	vocab_valid.parse_to_indexed_windows(to_lower=True)
-	output_size = len(L2I)
-	model = Model(output_size, hidden_size, embedding_length, window_size, weights)
-	model = iterate_model(model, make_loader(vocab_train, batch_size), make_loader(vocab_valid, batch_size),
-				I2L, epochs, batch_size, hidden_size, learning_rate)
-
-	# test_parser = Parser(window_size, data_name, 'test')
-	# test_parser.parse_to_indexed_windows()
-	# predict_by_windows(model, make_test_loader(test_parser), data_name, I2L)
+def arguments_handler():
+    data_type = sys.argv[1] if len(sys.argv) > 1 else 'pos'
+    if data_type == 'ner' or data_type == 'pos':
+        tagger_2(data_type)
+    else:
+        print("Invalid data type;\n"
+              "\tValid data types are:\n"
+              "\t\t1. pos\n"
+              "\t\t2. ner\n"
+              "default is pos")
 
 
 if __name__ == "__main__":
-	tagger_2()
+    # you can accept arguments or choose a data type by hand
+    arguments_handler()
+    # tagger2('pos')
